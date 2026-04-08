@@ -1,7 +1,10 @@
 /**
  * Drawable word banks for Impostor Dibujo Edition.
  * Words are things that can actually be drawn.
+ * Supports ES and EN locales.
  */
+
+import { getLocale } from '$lib/i18n';
 
 export interface WordPair {
 	citizen: string;
@@ -14,7 +17,7 @@ export interface WordCategory {
 	pairs: WordPair[];
 }
 
-export const DRAW_CATEGORIES: WordCategory[] = [
+const DRAW_CATEGORIES_ES: WordCategory[] = [
 	{
 		name: 'Animales',
 		icon: 'material-symbols--pets',
@@ -113,8 +116,120 @@ export const DRAW_CATEGORIES: WordCategory[] = [
 	},
 ];
 
+const DRAW_CATEGORIES_EN: WordCategory[] = [
+	{
+		name: 'Animals',
+		icon: 'material-symbols--pets',
+		pairs: [
+			{ citizen: 'Cat', impostor: ['Dog', 'Rabbit', 'Hamster'] },
+			{ citizen: 'Fish', impostor: ['Whale', 'Dolphin', 'Shark'] },
+			{ citizen: 'Spider', impostor: ['Crab', 'Scorpion', 'Ant'] },
+			{ citizen: 'Butterfly', impostor: ['Dragonfly', 'Bee', 'Ladybug'] },
+			{ citizen: 'Snake', impostor: ['Worm', 'Lizard', 'Eel'] },
+			{ citizen: 'Bird', impostor: ['Bat', 'Paper plane', 'Fly'] },
+			{ citizen: 'Turtle', impostor: ['Snail', 'Hermit crab', 'Armadillo'] },
+			{ citizen: 'Elephant', impostor: ['Hippo', 'Rhino', 'Mammoth'] },
+			{ citizen: 'Octopus', impostor: ['Jellyfish', 'Squid', 'Starfish'] },
+			{ citizen: 'Monkey', impostor: ['Bear', 'Koala', 'Sloth'] },
+		],
+	},
+	{
+		name: 'Objects',
+		icon: 'material-symbols--inventory-2',
+		pairs: [
+			{ citizen: 'Umbrella', impostor: ['Mushroom', 'Parachute', 'Parasol'] },
+			{ citizen: 'Guitar', impostor: ['Violin', 'Banjo', 'Harp'] },
+			{ citizen: 'Key', impostor: ['Padlock', 'Wrench', 'Lock'] },
+			{ citizen: 'Scissors', impostor: ['Knife', 'Razor', 'Pliers'] },
+			{ citizen: 'Clock', impostor: ['Compass', 'Stopwatch', 'Hourglass'] },
+			{ citizen: 'Light bulb', impostor: ['Candle', 'Flashlight', 'Lamp'] },
+			{ citizen: 'Camera', impostor: ['Television', 'Binoculars', 'Microscope'] },
+			{ citizen: 'Crown', impostor: ['Hat', 'Helmet', 'Tiara'] },
+			{ citizen: 'Sword', impostor: ['Arrow', 'Axe', 'Trident'] },
+			{ citizen: 'Ladder', impostor: ['Bridge', 'Slide', 'Ramp'] },
+		],
+	},
+	{
+		name: 'Food',
+		icon: 'material-symbols--restaurant',
+		pairs: [
+			{ citizen: 'Pizza', impostor: ['Pie', 'Quiche', 'Tortilla'] },
+			{ citizen: 'Apple', impostor: ['Cherry', 'Tomato', 'Peach'] },
+			{ citizen: 'Burger', impostor: ['Taco', 'Sandwich', 'Kebab'] },
+			{ citizen: 'Ice cream', impostor: ['Cupcake', 'Popsicle', 'Mousse'] },
+			{ citizen: 'Banana', impostor: ['Carrot', 'Cucumber', 'Eggplant'] },
+			{ citizen: 'Fried egg', impostor: ['Pancake', 'Waffle', 'Crepe'] },
+			{ citizen: 'Donut', impostor: ['Pretzel', 'Bagel', 'Ring cake'] },
+			{ citizen: 'Watermelon', impostor: ['Pineapple', 'Melon', 'Coconut'] },
+			{ citizen: 'Hot dog', impostor: ['Burrito', 'Spring roll', 'Churro'] },
+			{ citizen: 'Sushi', impostor: ['Toast', 'Bruschetta', 'Nigiri'] },
+		],
+	},
+	{
+		name: 'Places',
+		icon: 'material-symbols--location-on',
+		pairs: [
+			{ citizen: 'House', impostor: ['Castle', 'Igloo', 'Hut'] },
+			{ citizen: 'Island', impostor: ['Mountain', 'Hill', 'Volcano'] },
+			{ citizen: 'Rocket', impostor: ['Airplane', 'Helicopter', 'Balloon'] },
+			{ citizen: 'Ship', impostor: ['Submarine', 'Canoe', 'Raft'] },
+			{ citizen: 'Church', impostor: ['Mosque', 'Pagoda', 'Temple'] },
+			{ citizen: 'Lighthouse', impostor: ['Tower', 'Column', 'Antenna'] },
+			{ citizen: 'Volcano', impostor: ['Pyramid', 'Mountain', 'Geyser'] },
+			{ citizen: 'Tent', impostor: ['Cabin', 'Igloo', 'Shelter'] },
+			{ citizen: 'Ferris wheel', impostor: ['Carousel', 'Roller coaster', 'Swing'] },
+			{ citizen: 'Bridge', impostor: ['Tunnel', 'Aqueduct', 'Arch'] },
+		],
+	},
+	{
+		name: 'Nature',
+		icon: 'material-symbols--park',
+		pairs: [
+			{ citizen: 'Tree', impostor: ['Cactus', 'Palm tree', 'Bamboo'] },
+			{ citizen: 'Sun', impostor: ['Moon', 'Star', 'Planet'] },
+			{ citizen: 'Flower', impostor: ['Mushroom', 'Clover', 'Rose'] },
+			{ citizen: 'Cloud', impostor: ['Lightning', 'Fog', 'Smoke'] },
+			{ citizen: 'Star', impostor: ['Comet', 'Meteor', 'Planet'] },
+			{ citizen: 'Rainbow', impostor: ['Tornado', 'Northern lights', 'Whirlpool'] },
+			{ citizen: 'Waves', impostor: ['Waterfall', 'River', 'Tsunami'] },
+			{ citizen: 'Leaf', impostor: ['Feather', 'Petal', 'Wing'] },
+			{ citizen: 'Fire', impostor: ['Ice', 'Lava', 'Spark'] },
+			{ citizen: 'Spiderweb', impostor: ['Nest', 'Net', 'Web'] },
+		],
+	},
+	{
+		name: 'People',
+		icon: 'material-symbols--person',
+		pairs: [
+			{ citizen: 'Robot', impostor: ['Alien', 'Cyborg', 'Android'] },
+			{ citizen: 'Pirate', impostor: ['Viking', 'Sailor', 'Corsair'] },
+			{ citizen: 'Clown', impostor: ['Magician', 'Mime', 'Jester'] },
+			{ citizen: 'Ghost', impostor: ['Vampire', 'Zombie', 'Mummy'] },
+			{ citizen: 'King', impostor: ['Prince', 'Emperor', 'Pharaoh'] },
+			{ citizen: 'Ninja', impostor: ['Samurai', 'Gladiator', 'Swordsman'] },
+			{ citizen: 'Mermaid', impostor: ['Fairy', 'Unicorn', 'Angel'] },
+			{ citizen: 'Superhero', impostor: ['Villain', 'Antihero', 'Mutant'] },
+			{ citizen: 'Astronaut', impostor: ['Diver', 'Pilot', 'Explorer'] },
+			{ citizen: 'Witch', impostor: ['Monster', 'Goblin', 'Ogre'] },
+		],
+	},
+];
+
+const DRAW_DATA: Record<string, WordCategory[]> = {
+	es: DRAW_CATEGORIES_ES,
+	en: DRAW_CATEGORIES_EN,
+};
+
+export function getDrawCategories(): WordCategory[] {
+	return DRAW_DATA[getLocale()] ?? DRAW_CATEGORIES_ES;
+}
+
+/** @deprecated Use getDrawCategories() for locale-aware categories */
+export const DRAW_CATEGORIES = DRAW_CATEGORIES_ES;
+
 export function getRandomDrawPair(category?: string): { pair: WordPair; category: string; selectedImpostor: string } {
-	let cats = DRAW_CATEGORIES;
+	const allCats = getDrawCategories();
+	let cats = allCats;
 	if (category) {
 		const found = cats.find((c) => c.name === category);
 		if (found) cats = [found];

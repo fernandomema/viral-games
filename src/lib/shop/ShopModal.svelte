@@ -12,6 +12,7 @@
 		formatPrice,
 	} from '$lib/shop/shop-store.svelte';
 	import { hapticTap } from '$lib/haptics';
+	import { t } from '$lib/i18n';
 
 	let { open = $bindable(false) } = $props();
 
@@ -69,7 +70,7 @@
 			<div class="flex items-center justify-between px-4 py-3 border-b border-outline-variant/20 shrink-0">
 				<h2 class="text-lg font-bold font-headline flex items-center gap-2">
 					<span class="iconify material-symbols--storefront text-xl text-primary"></span>
-					<span class="text-on-surface">Tienda</span>
+					<span class="text-on-surface">{t('shop.title')}</span>
 				</h2>
 				<button onclick={close} class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors">
 					<span class="iconify material-symbols--close text-lg"></span>
@@ -83,21 +84,21 @@
 					class="flex-1 py-1.5 rounded-lg text-xs font-medium transition-all {tab === 'backgrounds' ? 'bg-primary text-on-primary' : 'bg-surface-container-highest text-on-surface-variant'}"
 				>
 					<span class="iconify material-symbols--wallpaper text-sm align-middle mr-0.5"></span>
-					Fondos
+					{t('shop.backgrounds')}
 				</button>
 				<button
 					onclick={() => { tab = 'frames'; hapticTap(); }}
 					class="flex-1 py-1.5 rounded-lg text-xs font-medium transition-all {tab === 'frames' ? 'bg-primary text-on-primary' : 'bg-surface-container-highest text-on-surface-variant'}"
 				>
 					<span class="iconify material-symbols--frame-person text-sm align-middle mr-0.5"></span>
-					Marcos
+					{t('shop.frames')}
 				</button>
 				<button
 					onclick={() => { tab = 'effects'; hapticTap(); }}
 					class="flex-1 py-1.5 rounded-lg text-xs font-medium transition-all {tab === 'effects' ? 'bg-primary text-on-primary' : 'bg-surface-container-highest text-on-surface-variant'}"
 				>
 					<span class="iconify material-symbols--auto-awesome text-sm align-middle mr-0.5"></span>
-					Efectos
+					{t('shop.effects')}
 				</button>
 			</div>
 
@@ -129,21 +130,21 @@
 									{#if comingSoon}
 										<div class="absolute top-1.5 right-1.5 bg-outline-variant/30 text-on-surface-variant rounded-full px-1.5 py-0.5 text-[10px] font-bold flex items-center gap-0.5">
 											<span class="iconify material-symbols--schedule text-xs"></span>
-											Próximamente
+											{t('shop.comingSoon')}
 										</div>
 									{:else if active}
 										<div class="absolute top-1.5 right-1.5 bg-primary text-on-primary rounded-full px-1.5 py-0.5 text-[10px] font-bold flex items-center gap-0.5">
 											<span class="iconify material-symbols--check text-xs"></span>
-											Activo
+											{t('shop.active')}
 										</div>
 									{:else if owned}
 										<div class="absolute top-1.5 right-1.5 bg-secondary/20 text-secondary rounded-full px-1.5 py-0.5 text-[10px] font-bold">
-											Tuyo
+											{t('shop.owned')}
 										</div>
 									{:else}
 										<div class="absolute top-1.5 right-1.5 bg-tertiary/20 text-tertiary rounded-full px-1.5 py-0.5 text-[10px] font-bold flex items-center gap-0.5">
 											<span class="iconify material-symbols--shopping-cart text-xs"></span>
-											{price ? formatPrice(price) : 'Comprar'}
+											{price ? formatPrice(price) : t('shop.buy')}
 										</div>
 									{/if}
 								</div>
@@ -169,7 +170,7 @@
 									style="{frame.borderCSS} {frame.glowCSS ?? ''}"
 								>
 									<span class="iconify material-symbols--person text-primary text-sm"></span>
-									<span class="text-on-surface font-medium">Jugador</span>
+									<span class="text-on-surface font-medium">{t('shop.player')}</span>
 								</span>
 
 								<!-- Info -->
@@ -182,16 +183,16 @@
 								{#if comingSoon}
 									<span class="text-on-surface-variant text-[10px] font-bold flex items-center gap-0.5">
 										<span class="iconify material-symbols--schedule text-xs"></span>
-										Pronto
+										{t('shop.soon')}
 									</span>
 								{:else if active}
 									<span class="iconify material-symbols--check-circle text-primary text-lg"></span>
 								{:else if owned}
-									<span class="text-secondary text-[10px] font-bold">Tuyo</span>
+									<span class="text-secondary text-[10px] font-bold">{t('shop.owned')}</span>
 								{:else}
 									<span class="text-tertiary text-[10px] font-bold flex items-center gap-0.5">
 										<span class="iconify material-symbols--shopping-cart text-xs"></span>
-										{price ? formatPrice(price) : 'Comprar'}
+										{price ? formatPrice(price) : t('shop.buy')}
 									</span>
 								{/if}
 							</button>
@@ -223,16 +224,16 @@
 								{#if comingSoon}
 									<span class="text-on-surface-variant text-[10px] font-bold flex items-center gap-0.5">
 										<span class="iconify material-symbols--schedule text-xs"></span>
-										Pronto
+										{t('shop.soon')}
 									</span>
 								{:else if active}
 									<span class="iconify material-symbols--check-circle text-primary text-lg"></span>
 								{:else if owned}
-									<span class="text-secondary text-[10px] font-bold">Tuyo</span>
+									<span class="text-secondary text-[10px] font-bold">{t('shop.owned')}</span>
 								{:else}
 									<span class="text-tertiary text-[10px] font-bold flex items-center gap-0.5">
 										<span class="iconify material-symbols--shopping-cart text-xs"></span>
-										{price ? formatPrice(price) : 'Comprar'}
+										{price ? formatPrice(price) : t('shop.buy')}
 									</span>
 								{/if}
 							</button>

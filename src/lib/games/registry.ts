@@ -48,7 +48,7 @@ export const GAMES: GameDef[] = [
 		hoverGlow: 'rgba(156,66,244,0.2)',
 		headerIcon: 'material-symbols--shield-person',
 		headerTitle: 'EL IMPOSTOR',
-		heroIcon: 'material-symbols--theater-comedy',
+		heroIcon: 'material-symbols--fingerprint',
 		heroSubtitle: 'Inicia el Interrogatorio',
 		heroTitleHtml:
 			'EL <span class="text-transparent bg-clip-text bg-linear-to-r from-primary to-primary-container">IMPOSTOR</span>',

@@ -8,11 +8,9 @@ function get(): WebHaptics {
 }
 
 export function haptic(preset: 'success' | 'nudge' | 'error' | 'buzz' = 'nudge') {
-	if (!WebHaptics.isSupported) return;
 	get().trigger(preset);
 }
 
 export function hapticTap(ms = 40) {
-	if (!WebHaptics.isSupported) return;
 	get().trigger(ms);
 }

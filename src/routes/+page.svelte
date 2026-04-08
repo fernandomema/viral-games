@@ -2,6 +2,8 @@
 	import { goto } from '$app/navigation';
 	import { getActiveGame, clearActiveGame } from '$lib/active-game';
 	import { GAMES } from '$lib/games/registry';
+	import { t, getLocale, setLocale, SUPPORTED_LOCALES, LOCALE_LABELS } from '$lib/i18n';
+	import type { Locale } from '$lib/i18n';
 
 	let titleEls: HTMLElement[] = [];
 	let iconEls: HTMLElement[] = [];
@@ -31,12 +33,19 @@
 		if (iconEls[index]) iconEls[index].style.viewTransitionName = 'game-icon';
 		goto(href);
 	}
+
+	function toggleLocale() {
+		const current = getLocale();
+		const i = SUPPORTED_LOCALES.indexOf(current);
+		const next = SUPPORTED_LOCALES[(i + 1) % SUPPORTED_LOCALES.length];
+		setLocale(next);
+	}
 </script>
 
 <div class="min-h-screen bg-background">
 
 	<!-- ═══ Fondo (fixed para no interferir con sticky) ═══ -->
-	<div class="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
+	<div class="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true" style="view-transition-name: bg-orbs">
 		<div class="absolute inset-0 grid-bg"></div>
 		<div class="orb-a absolute -top-48 -left-48 w-150 h-150 rounded-full bg-primary-dim opacity-[0.22] blur-[160px]"></div>
 		<div class="orb-b absolute bottom-0 -right-32 w-125 h-125 rounded-full bg-secondary opacity-[0.13] blur-[140px]"></div>
@@ -50,9 +59,19 @@
 				<span class="iconify material-symbols--sports-esports text-primary text-xl"></span>
 				<span class="font-headline font-black text-base tracking-tighter text-on-surface">VIRAL GAMES</span>
 			</div>
-			<div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/10 border border-secondary/25">
-				<span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
-				<span class="font-label text-secondary text-[10px] tracking-widest uppercase">{GAMES.length} modos</span>
+			<div class="flex items-center gap-3">
+				<button
+					onclick={toggleLocale}
+					class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-high border border-outline-variant/30 hover:bg-surface-container-highest transition-colors"
+					title="Change language"
+				>
+					<span class="iconify material-symbols--language text-on-surface-variant text-sm"></span>
+					<span class="font-label text-on-surface-variant text-[10px] tracking-widest uppercase">{getLocale().toUpperCase()}</span>
+				</button>
+				<div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/10 border border-secondary/25">
+					<span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
+					<span class="font-label text-secondary text-[10px] tracking-widest uppercase">{GAMES.length} {t('home.modes')}</span>
+				</div>
 			</div>
 		</header>
 	</div>
@@ -60,7 +79,7 @@
 	<!-- ═══ Hero sticky transparente ═══ -->
 	<div class="sticky top-14 z-20 px-5 py-4 text-center">
 		<h1 class="font-headline font-black leading-none tracking-tighter text-on-surface text-4xl lg:text-5xl neon-glow-primary">
-			ELIGE TU <span class="text-primary">MODO</span>
+			{@html t('home.chooseMode').replace(t('home.mode'), `<span class="text-primary">${t('home.mode')}</span>`)}
 		</h1>
 	</div>
 
@@ -97,13 +116,13 @@
 						<!-- Texto -->
 						<div class="flex-1">
 							<h2 bind:this={titleEls[i]} class="font-headline font-black text-xl leading-tight text-on-surface mb-1.5">{@html game.cardTitleHtml}</h2>
-							<p class="font-body text-xs text-on-surface-variant leading-relaxed">{game.description}</p>
+							<p class="font-body text-xs text-on-surface-variant leading-relaxed">{t(`game.${game.id}.description`)}</p>
 						</div>
 
 						<!-- CTA -->
 						<div class="flex items-center justify-between border-t border-white/8 pt-4">
 							<span class="px-3 py-1 rounded-full {game.badgeClass} text-[10px] font-black uppercase tracking-widest">
-								JUGAR
+								{t('home.play')}
 							</span>
 							<span class="iconify material-symbols--arrow-forward {game.iconColorClass} text-lg opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200">
 							</span>
@@ -118,12 +137,12 @@
 			<div class="inline-flex items-center gap-5 px-6 py-3 rounded-2xl liquid-card border border-white/8">
 				<div class="flex items-center gap-2">
 					<span class="iconify material-symbols--group text-primary text-sm"></span>
-					<span class="font-label text-xs text-on-surface-variant">3–12 jugadores</span>
+					<span class="font-label text-xs text-on-surface-variant">{t('home.players')}</span>
 				</div>
 				<div class="w-px h-4 bg-white/10"></div>
 				<div class="flex items-center gap-2">
 					<span class="iconify material-symbols--wifi text-secondary text-sm"></span>
-					<span class="font-label text-xs text-on-surface-variant">Sin internet</span>
+					<span class="font-label text-xs text-on-surface-variant">{t('home.offline')}</span>
 				</div>
 			</div>
 		</div>

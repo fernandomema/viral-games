@@ -2,7 +2,10 @@
  * Fun fact banks for Impostor Datos — framework-agnostic.
  * Each category has a pool of real facts and a pool of fake facts.
  * Each citizen gets a unique real fact; the impostor gets a fake one.
+ * Supports ES and EN locales.
  */
+
+import { getLocale } from '$lib/i18n';
 
 export interface FactCategory {
 	name: string;
@@ -11,7 +14,7 @@ export interface FactCategory {
 	fakeFacts: string[];
 }
 
-export const FACT_CATEGORIES: FactCategory[] = [
+const FACT_CATEGORIES_ES: FactCategory[] = [
 	{
 		name: 'Ciencia',
 		icon: 'material-symbols--science',
@@ -188,6 +191,195 @@ export const FACT_CATEGORIES: FactCategory[] = [
 	},
 ];
 
+const FACT_CATEGORIES_EN: FactCategory[] = [
+	{
+		name: 'Science',
+		icon: 'material-symbols--science',
+		realFacts: [
+			'The Eiffel Tower can be 15 cm taller during summer due to thermal expansion.',
+			'Human teeth are the only part of the body that cannot heal themselves.',
+			'Hot water freezes faster than cold water; it\'s called the Mpemba effect.',
+			'A lightning bolt is five times hotter than the surface of the Sun.',
+			'Bananas are slightly radioactive due to their potassium-40 content.',
+			'Human DNA shares 60% of its genes with bananas.',
+			'A teaspoon of neutron star would weigh about 6 billion tons.',
+			'Octopuses have three hearts and blue blood.',
+			'Honey never spoils; edible honey has been found in 3,000-year-old Egyptian tombs.',
+			'Venus is the only planet in the solar system that rotates in the opposite direction.',
+			'Sunlight takes 8 minutes and 20 seconds to reach Earth.',
+			'Saturn would float if there were an ocean large enough.',
+		],
+		fakeFacts: [
+			'The Eiffel Tower was originally built as a military radio antenna.',
+			'Human teeth continue to grow slowly throughout life.',
+			'Distilled water cannot freeze under normal pressure.',
+			'Lightning can only strike in areas with high relative humidity.',
+			'Bananas change color when ripening because they absorb UV radiation.',
+			'Human DNA has exactly 30 chromosomes.',
+			'A neutron star emits visible light that can be seen from Earth with the naked eye.',
+			'Octopuses can survive out of water for up to 48 hours.',
+			'Venus is the closest planet to the Sun in the entire solar system.',
+		],
+	},
+	{
+		name: 'History',
+		icon: 'material-symbols--history-edu',
+		realFacts: [
+			'Cleopatra lived closer in time to the Moon landing than to the building of the pyramids.',
+			'Oxford University is older than the Aztec Empire.',
+			'In ancient Rome, urine was used as mouthwash due to its ammonia content.',
+			'Vikings used animal bones to make ice skates.',
+			'The Great Wall of China is not visible to the naked eye from space.',
+			'Napoleon wasn\'t particularly short; he was 5\'7", average for his time.',
+			'The Hundred Years\' War actually lasted 116 years.',
+			'Albert Einstein never failed math in school.',
+			'The Roman Colosseum could be flooded with water to simulate naval battles.',
+			'Ancient Egyptians used mold as an antibiotic long before penicillin.',
+			'The U.S. Declaration of Independence was signed on hemp paper.',
+			'In the 18th century, wigs became fashionable because King Louis XIII was bald.',
+		],
+		fakeFacts: [
+			'Cleopatra was the first female pharaoh to rule Egypt.',
+			'Oxford was founded by the Romans in the 1st century AD.',
+			'In ancient Rome, it was illegal to sneeze in public.',
+			'Vikings navigated exclusively using the stars as their guide.',
+			'The Great Wall of China was built in a single century by one emperor.',
+			'Napoleon won every battle he personally commanded.',
+			'The Hundred Years\' War was fought between Spain and Portugal.',
+			'Samurai were forbidden from learning to read and write.',
+			'Albert Einstein invented the electric light bulb before Edison.',
+		],
+	},
+	{
+		name: 'Nature',
+		icon: 'material-symbols--park',
+		realFacts: [
+			'Cows have best friends and get stressed when separated from them.',
+			'Flamingos are born white and turn pink because of their shrimp diet.',
+			'A group of flamingos is called a "flamboyance."',
+			'Sea otters hold hands while sleeping so they don\'t drift apart.',
+			'Koalas sleep up to 22 hours a day.',
+			'Ants can lift 50 times their own body weight.',
+			'Dolphins sleep with one eye open.',
+			'Bees can recognize human faces.',
+			'Elephants are the only animals that can\'t jump.',
+			'Cats have more bones than humans: 230 vs 206.',
+			'Sloths can hold their breath for up to 40 minutes underwater.',
+			'Butterflies can taste with their feet.',
+		],
+		fakeFacts: [
+			'Cows can swim up to 10 kilometers without resting.',
+			'Flamingos can fly at over 300 km/h when migrating.',
+			'A group of flamingos always has an even number of members.',
+			'Sea otters can hold their breath for up to 30 minutes.',
+			'Koalas are immune to all natural poisons in Australia.',
+			'Ants can only live in colonies of exactly 10,000 members.',
+			'Dolphins can communicate with whales of any species.',
+			'Bees only produce honey during the night.',
+			'Elephants have a memory that lasts only 24 hours.',
+		],
+	},
+	{
+		name: 'Human Body',
+		icon: 'material-symbols--person',
+		realFacts: [
+			'The stomach produces a new lining every 3-4 days to avoid digesting itself.',
+			'Humans share 99.9% of their DNA with each other.',
+			'Your nose can remember 50,000 different scents.',
+			'The strongest bone in the human body is the femur.',
+			'The human body produces enough heat in 30 minutes to boil half a liter of water.',
+			'Babies are born with 300 bones, but adults only have 206.',
+			'The human tongue has a unique print, like fingerprints.',
+			'The human brain uses 20% of the body\'s total energy.',
+			'You blink approximately 20,000 times a day.',
+			'Skin is the largest organ of the human body.',
+			'The human eye can distinguish approximately 10 million colors.',
+			'Your body has more bacteria than human cells.',
+		],
+		fakeFacts: [
+			'The human stomach can expand up to 100 times its original size.',
+			'Every human has a unique number of chromosomes.',
+			'Your nose stops working completely while you sleep.',
+			'The smallest bone in the human body is in the little finger.',
+			'The human body can generate enough electricity to charge a phone.',
+			'Babies are born without kneecaps and develop them at age 10.',
+			'The human tongue is the strongest muscle in the body.',
+			'The human brain stops developing at age 5.',
+			'Human skin renews itself completely every 24 hours.',
+		],
+	},
+	{
+		name: 'Technology',
+		icon: 'material-symbols--computer',
+		realFacts: [
+			'The first text message (SMS) was sent in 1992 and said "Merry Christmas."',
+			'Google was originally called "BackRub."',
+			'The first hard drive (1956) weighed over a ton and stored only 5 MB.',
+			'More than 90% of the world\'s money exists only in digital format.',
+			'The creator of the Game Boy also created the Nintendo D-Pad.',
+			'QWERTY was designed to slow down typing to prevent keys from jamming.',
+			'WiFi doesn\'t stand for "Wireless Fidelity"; it\'s just a brand name.',
+			'Amazon originally only sold books.',
+			'The first video game ever was "Tennis for Two" in 1958.',
+			'There are more devices connected to the Internet than people in the world.',
+			'The first computer weighed over 27 tons and filled an entire room.',
+			'The original source code for the World Wide Web was written on a NeXT by Steve Jobs.',
+		],
+		fakeFacts: [
+			'The first text message was sent by accident by a programmer.',
+			'Google was founded in a garage in Japan.',
+			'The first hard drive was invented for exclusive military use.',
+			'Digital money was invented before credit cards.',
+			'The Game Boy was originally designed to be a medical device.',
+			'QWERTY was designed by a doctor to improve ergonomics.',
+			'WiFi was invented in Australia in the 1970s.',
+			'Amazon was the first online store in the world.',
+			'The first video game was created by NASA to train astronauts.',
+		],
+	},
+	{
+		name: 'Geography',
+		icon: 'material-symbols--public',
+		realFacts: [
+			'Russia has 11 different time zones.',
+			'Canada has more lakes than the rest of the world\'s countries combined.',
+			'Australia is wider than the Moon in diameter.',
+			'There\'s a place on Earth where the Atlantic and Pacific oceans meet without mixing.',
+			'The deepest point in the ocean is the Mariana Trench at nearly 11 km deep.',
+			'Iceland has no military and never has had one.',
+			'The Sahara is not the largest desert; Antarctica is.',
+			'Mongolia is the country with the lowest population density in the world.',
+			'Finland has more saunas than cars.',
+			'The Amazon River has no bridges crossing it.',
+			'More than half of the world\'s coastline belongs to just 10 countries.',
+			'Lesotho, San Marino, and Vatican City are completely surrounded by a single country.',
+		],
+		fakeFacts: [
+			'Russia has the same number of time zones as the United States.',
+			'Canada is the coldest country in the world on annual average.',
+			'Australia has more desert than the Sahara.',
+			'The Pacific Ocean is saltier than the Atlantic everywhere.',
+			'The Mariana Trench was discovered by a Spanish submarine.',
+			'Iceland is the country with the most active volcanoes in the world.',
+			'The Sahara grows approximately 1 km every day.',
+			'Mongolia has the highest-altitude capital city in the world.',
+			'In Finland, it is illegal by law not to know how to swim.',
+		],
+	},
+];
+
+const FACT_DATA: Record<string, FactCategory[]> = {
+	es: FACT_CATEGORIES_ES,
+	en: FACT_CATEGORIES_EN,
+};
+
+export function getFactCategories(): FactCategory[] {
+	return FACT_DATA[getLocale()] ?? FACT_CATEGORIES_ES;
+}
+
+/** @deprecated Use getFactCategories() for locale-aware categories */
+export const FACT_CATEGORIES = FACT_CATEGORIES_ES;
+
 function shuffleArray<T>(arr: T[]): T[] {
 	const a = [...arr];
 	for (let i = a.length - 1; i > 0; i--) {
@@ -203,7 +395,7 @@ function shuffleArray<T>(arr: T[]): T[] {
  * @param category optional category filter
  */
 export function getFactsForRound(citizenCount: number, category?: string): { realFacts: string[]; fakeFact: string } {
-	let cats = FACT_CATEGORIES;
+	let cats = getFactCategories();
 	if (category) {
 		const filtered = cats.filter((c) => c.name === category);
 		if (filtered.length > 0) cats = filtered;

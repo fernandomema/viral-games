@@ -107,38 +107,41 @@ html, body {
 	-webkit-tap-highlight-color: transparent;
 }
 
-/* View transition cross-fade */
+/* View transition cross-fade – keep root instant to avoid snapshotting lag */
 ::view-transition-old(root),
 ::view-transition-new(root) {
-	animation-duration: 220ms;
-	animation-timing-function: ease-in-out;
+	animation: none;
+	mix-blend-mode: normal;
 }
-::view-transition-old(root) {
-	animation-name: vt-fade-out;
-}
+/* New page fades in on top of old page (no snapshot repaint) */
 ::view-transition-new(root) {
-	animation-name: vt-fade-in;
+	animation: vt-fade-in 200ms ease-out;
 }
 
-@keyframes vt-fade-out {
-	from { opacity: 1; transform: scale(1); }
-	to   { opacity: 0; transform: scale(0.97); }
+/* Background orbs: hide old immediately, fade in new with page */
+::view-transition-old(bg-orbs) {
+	animation: none;
+	display: none;
 }
+::view-transition-new(bg-orbs) {
+	animation: none;
+}
+
 @keyframes vt-fade-in {
-	from { opacity: 0; transform: scale(1.03); }
-	to   { opacity: 1; transform: scale(1); }
+	from { opacity: 0; }
+	to   { opacity: 1; }
 }
 
 /* Shared element: título del juego */
 ::view-transition-group(game-title),
 ::view-transition-group(game-icon) {
-	animation-duration: 380ms;
+	animation-duration: 300ms;
 	animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 ::view-transition-old(game-title),
 ::view-transition-new(game-title),
 ::view-transition-old(game-icon),
 ::view-transition-new(game-icon) {
-	animation-duration: 380ms;
+	animation-duration: 300ms;
 	animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }

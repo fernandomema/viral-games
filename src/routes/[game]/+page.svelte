@@ -1,16 +1,17 @@
 <script lang="ts">
 	import type { GameDef } from '$lib/games/registry';
-	import { createImpostorGame, WORD_CATEGORIES } from '$lib/games/impostor';
+	import { createImpostorGame, getWordCategories } from '$lib/games/impostor';
 	import type { ImpostorEngine } from '$lib/games/impostor';
-	import { createImpostorDrawGame, DRAW_CATEGORIES } from '$lib/games/impostor-draw';
+	import { createImpostorDrawGame, getDrawCategories } from '$lib/games/impostor-draw';
 	import type { ImpostorDrawEngine, Stroke } from '$lib/games/impostor-draw';
-	import { createImpostorDatosGame, FACT_CATEGORIES } from '$lib/games/impostor-datos';
+	import { createImpostorDatosGame, getFactCategories } from '$lib/games/impostor-datos';
 	import type { ImpostorDatosEngine } from '$lib/games/impostor-datos';
 	import DrawingCanvas from '$lib/components/DrawingCanvas.svelte';
 	import { loadPlayers, savePlayers } from '$lib/players-store';
 	import { beforeNavigate } from '$app/navigation';
 	import { setActiveGame } from '$lib/active-game';
 	import { haptic, hapticTap } from '$lib/haptics';
+	import { t } from '$lib/i18n';
 
 	let { data } = $props();
 	let game: GameDef = $derived(data.game);
@@ -36,9 +37,9 @@
 
 	// ── Categories ────────────────────────────────────────────────
 	let categories: { name: string; icon: string }[] = $derived(
-		game.type === 'word' ? WORD_CATEGORIES :
-		game.type === 'draw' ? DRAW_CATEGORIES :
-		FACT_CATEGORIES
+		game.type === 'word' ? getWordCategories() :
+		game.type === 'draw' ? getDrawCategories() :
+		getFactCategories()
 	);
 
 	// ── Reactive state ────────────────────────────────────────────
@@ -304,14 +305,14 @@
 <!-- ═══ TopAppBar ═══ -->
 <header class="fixed top-0 w-full z-50 flex items-center justify-between px-4 h-16 bg-background/90 border-b border-outline-variant/20 shadow-[0_0_20px_rgba(202,152,255,0.08)]" style="backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)">
 	<div class="flex items-center gap-1">
-		<a href="/" onclick={triggerViewTransition} class="p-2 rounded-xl hover:bg-surface-variant/40 active:scale-95 transition-all" aria-label="Volver">
+		<a href="/" onclick={triggerViewTransition} class="p-2 rounded-xl hover:bg-surface-variant/40 active:scale-95 transition-all" aria-label={t('game.back')}>
 			<span class="iconify material-symbols--arrow-back text-on-surface-variant text-xl"></span>
 		</a>
 		<span class="iconify {game.headerIcon} text-primary-dim text-xl"></span>
 		<span class="text-lg font-bold tracking-tighter {isGreen ? 'text-primary' : 'text-primary-dim'} font-headline">{game.headerTitle}</span>
 	</div>
 	{#if gameState.phase !== 'lobby'}
-		<button onclick={backToLobby} aria-label="Salir" class="p-2 rounded-full hover:bg-surface-variant/60 transition-all active:scale-95">
+		<button onclick={backToLobby} aria-label={t('game.exit')} class="p-2 rounded-full hover:bg-surface-variant/60 transition-all active:scale-95">
 			<span class="iconify material-symbols--close text-outline-variant"></span>
 		</button>
 	{/if}
@@ -333,23 +334,23 @@
 							<span class="iconify {game.heroIcon} text-6xl text-primary-dim drop-shadow-[0_0_15px_rgba(156,66,244,0.5)]"></span>
 						</div>
 					</div>
-					<p class="{isGreen ? 'text-secondary' : 'text-primary-dim'} font-headline uppercase tracking-[0.4em] text-xs font-bold">{game.heroSubtitle}</p>
+					<p class="{isGreen ? 'text-secondary' : 'text-primary-dim'} font-headline uppercase tracking-[0.4em] text-xs font-bold">{t(`game.${game.id}.heroSubtitle`)}</p>
 					<h1 bind:this={heroTitleEl} class="text-4xl lg:text-5xl font-headline font-extrabold tracking-tighter mt-2" style="view-transition-name: game-title">
 						{@html game.heroTitleHtml}
 					</h1>
-					<p class="text-on-surface-variant max-w-xs text-sm font-light leading-relaxed mt-3">{game.heroDescription}</p>
+					<p class="text-on-surface-variant max-w-xs text-sm font-light leading-relaxed mt-3">{t(`game.${game.id}.heroDescription`)}</p>
 				</div>
 
 				<!-- Player Config -->
 				<div class="mb-6">
 					<div class="flex items-center gap-2 mb-2">
-						<span class="{isGreen ? 'text-secondary' : 'text-primary-dim'} font-headline text-sm tracking-[0.2em] uppercase font-bold">Jugadores</span>
+						<span class="{isGreen ? 'text-secondary' : 'text-primary-dim'} font-headline text-sm tracking-[0.2em] uppercase font-bold">{t('game.players')}</span>
 						<div class="h-px grow bg-outline-variant/20"></div>
 					</div>
 					<h2 class="font-headline text-2xl font-bold tracking-tight leading-none">
-						Añade a los <span class="{isGreen ? 'text-primary-dim' : 'text-primary-dim'}">{game.playerLabel}s</span>
+						{t('game.addPlayers', { playerLabel: t(`game.${game.id}.playerLabel`) })}
 					</h2>
-					<p class="text-on-surface-variant mt-2 text-sm">Mínimo 3 jugadores para iniciar.</p>
+					<p class="text-on-surface-variant mt-2 text-sm">{t('game.minPlayers')}</p>
 				</div>
 
 				<!-- Input -->
@@ -360,7 +361,7 @@
 							<input
 								bind:value={playerName}
 								class="bg-transparent border-none focus:outline-none text-on-surface w-full font-medium placeholder:text-outline/50"
-								placeholder={game.inputPlaceholder}
+								placeholder={t(`game.${game.id}.inputPlaceholder`)}
 								type="text"
 								maxlength="20"
 							/>
@@ -370,7 +371,7 @@
 							disabled={!playerName.trim()}
 							class="bg-linear-to-r from-primary-dim to-primary text-on-primary-fixed px-6 py-3 rounded-lg font-bold transition-transform active:scale-95 flex items-center gap-2 shadow-[0_0_15px_rgba(156,66,244,0.3)] disabled:opacity-40"
 						>
-							AÑADIR
+							{t('game.add')}
 							<span class="iconify material-symbols--add text-sm"></span>
 						</button>
 					</div>
@@ -396,7 +397,7 @@
 									{/if}
 								</div>
 								<div class="grow min-w-0">
-									<span class="text-xs {isGreen ? 'text-secondary' : 'text-primary-dim'} font-headline font-bold uppercase tracking-tighter">{game.playerLabel} {String(i + 1).padStart(2, '0')}</span>
+									<span class="text-xs {isGreen ? 'text-secondary' : 'text-primary-dim'} font-headline font-bold uppercase tracking-tighter">{t(`game.${game.id}.playerLabel`)} {String(i + 1).padStart(2, '0')}</span>
 									<p class="font-bold text-lg text-on-surface truncate">{player.name}</p>
 								</div>
 								<button
@@ -417,17 +418,17 @@
 				<div class="glass-panel rounded-2xl p-6 border border-outline-variant/10 mb-6">
 					<div class="flex items-center gap-2 mb-5">
 						<span class="iconify material-symbols--tune {isGreen ? 'text-primary' : 'text-primary-dim'} text-xl"></span>
-						<h3 class="font-headline text-lg font-bold tracking-tight">CONFIGURACIÓN</h3>
+						<h3 class="font-headline text-lg font-bold tracking-tight">{t('game.config')}</h3>
 					</div>
 
 					<!-- Impostor count (all games) -->
 					<div class="mb-5">
 						<div class="flex items-center justify-between mb-2">
-							<label class="text-sm font-bold text-on-surface-variant font-headline uppercase tracking-wider">Impostores</label>
+							<label class="text-sm font-bold text-on-surface-variant font-headline uppercase tracking-wider">{t('game.impostors')}</label>
 							<span class="{isGreen ? 'text-primary' : 'text-primary-dim'} font-headline font-bold text-lg">{configImpostors}</span>
 						</div>
 						<div class="flex items-center gap-3">
-							<button onclick={() => configImpostors = Math.max(1, configImpostors - 1)}
+							<button onclick={() => { const prev = configImpostors; configImpostors = Math.max(1, configImpostors - 1); configImpostors === prev ? haptic('error') : hapticTap(); }}
 								class="w-10 h-10 rounded-lg bg-surface-container-high border border-outline-variant/20 flex items-center justify-center active:scale-90 transition-all hover:bg-surface-container-highest">
 								<span class="iconify material-symbols--remove text-on-surface-variant"></span>
 							</button>
@@ -435,24 +436,24 @@
 								<div class="h-full bg-linear-to-r from-primary-dim to-primary rounded-full transition-all"
 									style="width: {(configImpostors / Math.max(maxImpostors, 1)) * 100}%"></div>
 							</div>
-							<button onclick={() => configImpostors = Math.min(maxImpostors, configImpostors + 1)}
+							<button onclick={() => { const prev = configImpostors; configImpostors = Math.min(maxImpostors, configImpostors + 1); configImpostors === prev ? haptic('error') : hapticTap(); }}
 								class="w-10 h-10 rounded-lg bg-surface-container-high border border-outline-variant/20 flex items-center justify-center active:scale-90 transition-all hover:bg-surface-container-highest">
 								<span class="iconify material-symbols--add text-on-surface-variant"></span>
 							</button>
 						</div>
-						<p class="text-[10px] text-on-surface-variant mt-1">Máx {maxImpostors} para {gameState.players.length || 0} jugadores</p>
+						<p class="text-[10px] text-on-surface-variant mt-1">{t('game.maxImpostors', { max: maxImpostors, count: gameState.players.length || 0 })}</p>
 					</div>
 
 					<!-- Timer (word + fact only) -->
 					{#if game.type === 'word' || game.type === 'fact'}
 						<div class="mb-5">
 							<div class="flex items-center justify-between mb-2">
-								<label class="text-sm font-bold text-on-surface-variant font-headline uppercase tracking-wider">Temporizador</label>
+								<label class="text-sm font-bold text-on-surface-variant font-headline uppercase tracking-wider">{t('game.timer')}</label>
 								<span class="{isGreen ? 'text-primary' : 'text-primary-dim'} font-headline font-bold">{formatTime(configTimer)}</span>
 							</div>
 							<div class="flex flex-wrap gap-2">
 								{#each [120, 180, 300, 420, 600] as t}
-									<button onclick={() => configTimer = t}
+									<button onclick={() => { configTimer = t; hapticTap(); }}
 										class="px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all active:scale-95
 											{configTimer === t ? 'bg-primary text-on-primary-fixed' : 'bg-surface-container-high text-on-surface-variant border border-outline-variant/20'}">
 										{formatTime(t)}
@@ -466,12 +467,12 @@
 					{#if game.type === 'draw'}
 						<div class="mb-5">
 							<div class="flex items-center justify-between mb-2">
-								<label class="text-sm font-bold text-on-surface-variant font-headline uppercase tracking-wider">Rondas</label>
+								<label class="text-sm font-bold text-on-surface-variant font-headline uppercase tracking-wider">{t('game.rounds')}</label>
 								<span class="text-primary-dim font-headline font-bold">{configRounds}</span>
 							</div>
 							<div class="flex flex-wrap gap-2">
 								{#each [1,2,3,4] as r}
-									<button onclick={() => configRounds = r}
+									<button onclick={() => { configRounds = r; hapticTap(); }}
 										class="px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all active:scale-95
 											{configRounds === r ? 'bg-primary text-on-primary-fixed' : 'bg-surface-container-high text-on-surface-variant border border-outline-variant/20'}">
 										{r}
@@ -483,12 +484,12 @@
 						<!-- Timer per turn -->
 						<div class="mb-5">
 							<div class="flex items-center justify-between mb-2">
-								<label class="text-sm font-bold text-on-surface-variant font-headline uppercase tracking-wider">Seg. por turno</label>
+								<label class="text-sm font-bold text-on-surface-variant font-headline uppercase tracking-wider">{t('game.secsPerTurn')}</label>
 								<span class="text-primary-dim font-headline font-bold">{configTurnTimer}s</span>
 							</div>
 							<div class="flex flex-wrap gap-2">
 								{#each [10, 15, 20, 30] as t}
-									<button onclick={() => configTurnTimer = t}
+									<button onclick={() => { configTurnTimer = t; hapticTap(); }}
 										class="px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all active:scale-95
 											{configTurnTimer === t ? 'bg-primary text-on-primary-fixed' : 'bg-surface-container-high text-on-surface-variant border border-outline-variant/20'}">
 										{t}s
@@ -504,11 +505,11 @@
 							<div class="flex items-center gap-3">
 								<span class="iconify material-symbols--lightbulb {isGreen ? 'text-primary' : 'text-primary-dim'} text-xl"></span>
 								<div>
-									<p class="text-sm font-bold text-on-surface">Pista al impostor</p>
-									<p class="text-[10px] text-on-surface-variant">{game.type === 'word' ? 'Dar palabra similar al impostor' : 'Dar palabra similar'}</p>
+									<p class="text-sm font-bold text-on-surface">{t('game.impostorHint')}</p>
+									<p class="text-[10px] text-on-surface-variant">{game.type === 'word' ? t('game.impostorHintDesc') : t('game.impostorHintShort')}</p>
 								</div>
 							</div>
-							<button onclick={() => configHint = !configHint}
+							<button onclick={() => { configHint = !configHint; hapticTap(); }}
 								class="w-12 h-7 rounded-full transition-all relative {configHint ? 'bg-primary' : 'bg-surface-container-highest border border-outline-variant/30'}">
 								<div class="w-5 h-5 rounded-full bg-white shadow-md absolute top-1 transition-all {configHint ? 'left-6' : 'left-1'}"></div>
 							</button>
@@ -520,19 +521,19 @@
 				<div class="glass-panel rounded-2xl p-6 border border-outline-variant/10 mb-6">
 					<div class="flex items-center gap-2 mb-4">
 						<span class="iconify material-symbols--category {isGreen ? 'text-secondary' : 'text-primary-dim'} text-xl"></span>
-						<h3 class="font-headline text-lg font-bold tracking-tight">CATEGORÍA</h3>
+						<h3 class="font-headline text-lg font-bold tracking-tight">{t('game.category')}</h3>
 					</div>
 					<div class="flex flex-wrap gap-2">
 						<button
-							onclick={() => selectedCategory = undefined}
+							onclick={() => { selectedCategory = undefined; hapticTap(); }}
 							class="px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all active:scale-95
 								{selectedCategory === undefined ? 'bg-primary text-on-primary-fixed' : 'bg-surface-container-high text-on-surface-variant border border-outline-variant/20'}"
 						>
-							Aleatoria
+							{t('game.random')}
 						</button>
 						{#each categories as cat}
 							<button
-								onclick={() => selectedCategory = cat.name}
+								onclick={() => { selectedCategory = cat.name; hapticTap(); }}
 								class="px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all active:scale-95 flex items-center gap-1
 									{selectedCategory === cat.name ? 'bg-primary text-on-primary-fixed' : 'bg-surface-container-high text-on-surface-variant border border-outline-variant/20'}"
 							>
@@ -549,7 +550,7 @@
 					disabled={gameState.players.length < 3}
 					class="w-full py-5 rounded-xl bg-linear-to-r from-primary-dim to-primary text-on-primary-fixed font-headline font-bold text-xl uppercase tracking-widest shadow-[0_0_30px_rgba(156,66,244,0.3)] hover:shadow-[0_0_45px_rgba(156,66,244,0.5)] active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-40 disabled:cursor-not-allowed"
 				>
-					Empezar
+					{t('game.start')}
 					<span class="iconify material-symbols--play-arrow"></span>
 				</button>
 
@@ -557,24 +558,24 @@
 				<div class="flex items-center justify-center gap-8 py-4 px-6 mt-4 rounded-2xl bg-surface-container-highest/40 border border-outline-variant/10">
 					<div class="flex flex-col items-center gap-1">
 						<span class="{isGreen ? 'text-secondary' : 'text-primary-dim'} font-headline font-bold text-lg">{gameState.players.length}</span>
-						<span class="text-[10px] uppercase tracking-widest text-on-surface-variant">Jugadores</span>
+						<span class="text-[10px] uppercase tracking-widest text-on-surface-variant">{t('game.players')}</span>
 					</div>
 					<div class="w-px h-8 bg-outline-variant/20"></div>
 					{#if game.type === 'draw'}
 						<div class="flex flex-col items-center gap-1">
 							<span class="text-primary font-headline font-bold text-lg">{configRounds}×{configTurnTimer}s</span>
-							<span class="text-[10px] uppercase tracking-widest text-on-surface-variant">Rondas</span>
+							<span class="text-[10px] uppercase tracking-widest text-on-surface-variant">{t('game.rounds')}</span>
 						</div>
 					{:else}
 						<div class="flex flex-col items-center gap-1">
 							<span class="text-primary font-headline font-bold text-lg">{configImpostors}</span>
-							<span class="text-[10px] uppercase tracking-widest text-on-surface-variant">{configImpostors === 1 ? 'Impostor' : 'Impostores'}</span>
+							<span class="text-[10px] uppercase tracking-widest text-on-surface-variant">{configImpostors === 1 ? t('results.impostor') : t('results.impostors')}</span>
 						</div>
 						{#if game.type === 'word'}
 							<div class="w-px h-8 bg-outline-variant/20"></div>
 							<div class="flex flex-col items-center gap-1">
 								<span class="iconify {configHint ? 'material-symbols--lightbulb' : 'material-symbols--lightbulb-outline'} text-lg {configHint ? 'text-secondary' : 'text-outline-variant'}"></span>
-								<span class="text-[10px] uppercase tracking-widest text-on-surface-variant">{configHint ? 'Pista' : 'Sin pista'}</span>
+								<span class="text-[10px] uppercase tracking-widest text-on-surface-variant">{configHint ? t('game.impostorHint') : t('discord.noHint')}</span>
 							</div>
 						{/if}
 					{/if}
@@ -588,7 +589,7 @@
 			<!-- Desktop sidebar: player progress -->
 			<div class="hidden lg:block lg:sticky lg:top-24">
 				<div class="glass-panel rounded-2xl p-5 border border-outline-variant/10">
-					<h4 class="font-headline text-sm font-bold tracking-tight mb-4 uppercase text-on-surface-variant">Progreso de revelación</h4>
+					<h4 class="font-headline text-sm font-bold tracking-tight mb-4 uppercase text-on-surface-variant">{t('reveal.progress')}</h4>
 					{#each gameState.players as player, i}
 						<div class="flex items-center gap-3 py-2 {i === gameState.currentRevealIndex ? (isGreen ? 'text-primary' : 'text-primary-dim') : i < gameState.currentRevealIndex ? (isGreen ? 'text-secondary' : 'text-primary-dim') : 'text-on-surface-variant opacity-40'}">
 							<div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold font-headline
@@ -604,7 +605,7 @@
 						</div>
 					{/each}
 					<div class="mt-4 pt-4 border-t border-outline-variant/10">
-						<p class="text-[10px] text-on-surface-variant uppercase tracking-widest">{gameState.currentRevealIndex + 1} de {gameState.players.length}</p>
+						<p class="text-[10px] text-on-surface-variant uppercase tracking-widest">{t('reveal.of', { current: gameState.currentRevealIndex + 1, total: gameState.players.length })}</p>
 						<div class="mt-2 h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
 							<div class="h-full bg-linear-to-r from-primary-dim to-primary rounded-full transition-all" style="width: {((gameState.currentRevealIndex + 1) / gameState.players.length) * 100}%"></div>
 						</div>
@@ -621,12 +622,12 @@
 				<div class="text-center mb-8">
 					<div class="inline-flex items-center gap-2 bg-surface-container-highest/40 px-4 py-1.5 rounded-full border border-outline-variant/20 mb-4">
 						<span class="w-2 h-2 rounded-full {isGreen ? 'bg-secondary shadow-[0_0_8px_#2ff801]' : 'bg-primary shadow-[0_0_8px_#ca98ff]'}"></span>
-						<span class="font-headline {isGreen ? 'text-secondary' : 'text-primary-dim'} text-xs font-bold tracking-widest uppercase">Turno Actual</span>
+						<span class="font-headline {isGreen ? 'text-secondary' : 'text-primary-dim'} text-xs font-bold tracking-widest uppercase">{t('reveal.currentTurn')}</span>
 					</div>
 					{#if currentRevealPlayer}
 						<h2 class="font-headline text-5xl font-bold tracking-tight text-on-background">{currentRevealPlayer.name.toUpperCase()}</h2>
 					{/if}
-					<p class="text-on-surface-variant mt-3 font-medium">Pasa el dispositivo al jugador indicado</p>
+					<p class="text-on-surface-variant mt-3 font-medium">{t('reveal.passDevice')}</p>
 				</div>
 
 				<!-- The Secret Card -->
@@ -640,8 +641,8 @@
 								<span class="iconify material-symbols--visibility-off text-primary text-4xl"></span>
 							</div>
 							<div class="text-center space-y-4">
-								<p class="font-headline text-on-surface-variant uppercase tracking-widest text-sm font-bold opacity-60">Contenido Oculto</p>
-								<h3 class="font-headline text-2xl font-bold text-on-background leading-tight">{game.revealHiddenText}</h3>
+								<p class="font-headline text-on-surface-variant uppercase tracking-widest text-sm font-bold opacity-60">{t('reveal.hidden')}</p>
+								<h3 class="font-headline text-2xl font-bold text-on-background leading-tight">{t(`game.${game.id}.revealHiddenText`)}</h3>
 							</div>
 							<div class="mt-8 flex flex-col items-center gap-2 filter blur-md opacity-20 select-none">
 								<div class="h-8 w-32 bg-primary-container rounded-lg"></div>
@@ -653,7 +654,7 @@
 							>
 								<div class="reveal-gradient text-on-primary-fixed px-10 py-5 rounded-2xl font-headline font-bold text-xl tracking-tighter shadow-xl active:scale-95 transition-all flex items-center gap-3">
 									<span class="iconify material-symbols--key"></span>
-									REVELAR
+									{t('reveal.reveal')}
 								</div>
 							</button>
 						{:else}
@@ -663,41 +664,41 @@
 									<!-- Fact reveal -->
 									{#if revealedRole.role === 'impostor'}
 										<span class="iconify material-symbols--person-off text-tertiary text-5xl mb-4"></span>
-										<span class="font-headline text-xs font-bold text-tertiary tracking-[0.3em] uppercase mb-4">TRANSMISIÓN INTERCEPTADA</span>
+										<span class="font-headline text-xs font-bold text-tertiary tracking-[0.3em] uppercase mb-4">{t('reveal.intercepted')}</span>
 										<div class="text-center px-2">
-											<h3 class="font-headline text-3xl font-bold text-tertiary mb-3">¡ERES EL IMPOSTOR!</h3>
+											<h3 class="font-headline text-3xl font-bold text-tertiary mb-3">{t('reveal.youAreImpostor')}</h3>
 											<p class="font-body text-sm text-on-surface-variant leading-relaxed">
-												No tienes dato. Escucha a los demás e inventa un dato curioso creíble durante la discusión.
+												{t('reveal.noFact')}
 											</p>
 										</div>
 									{:else}
-										<span class="font-headline text-xs font-bold text-on-surface-variant tracking-[0.3em] uppercase mb-6">DATO CURIOSO</span>
+										<span class="font-headline text-xs font-bold text-on-surface-variant tracking-[0.3em] uppercase mb-6">{t('reveal.curiousFact')}</span>
 										<div class="text-center px-2">
 											<div class="mb-3 inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary-dim/10 border border-primary/20">
 												<span class="iconify material-symbols--check-circle text-primary-dim text-sm"></span>
-												<span class="font-body text-xs text-primary-dim uppercase tracking-widest font-bold">Dato Real</span>
+												<span class="font-body text-xs text-primary-dim uppercase tracking-widest font-bold">{t('reveal.realFact')}</span>
 											</div>
 											<p class="font-body text-lg font-medium leading-relaxed text-on-surface">
 												{revealedRole.fact}
 											</p>
-											<p class="text-on-surface-variant text-xs mt-4 opacity-60">(Recuerda tu dato, no lo compartas literalmente)</p>
+											<p class="text-on-surface-variant text-xs mt-4 opacity-60">{t('reveal.rememberFact')}</p>
 										</div>
 									{/if}
 								{:else}
 									<!-- Word / Draw reveal -->
 									<span class="font-headline text-xs font-bold text-on-surface-variant tracking-[0.3em] uppercase mb-8">
-										{game.type === 'draw' ? 'TU MISIÓN' : 'TRANSMISIÓN ENTRANTE'}
+										{game.type === 'draw' ? t('reveal.yourMission') : t('reveal.incoming')}
 									</span>
 									<div class="text-center">
 										{#if revealedRole.role === 'impostor'}
-											<p class="font-body text-sm text-tertiary uppercase tracking-widest font-bold mb-2">¡ERES EL IMPOSTOR!</p>
+											<p class="font-body text-sm text-tertiary uppercase tracking-widest font-bold mb-2">{t('reveal.youAreImpostor')}</p>
 											<h3 class="font-headline text-5xl font-bold text-tertiary neon-glow-primary tracking-tighter">{revealedRole.word}</h3>
 											{#if game.type === 'draw'}
-												<p class="text-on-surface-variant text-xs mt-3">Disimula y dibuja algo creíble</p>
+												<p class="text-on-surface-variant text-xs mt-3">{t('reveal.drawDisguise')}</p>
 											{/if}
 										{:else}
 											<p class="font-body text-sm {isGreen ? 'text-secondary neon-glow-secondary' : 'text-primary-dim neon-glow-primary'} uppercase tracking-widest font-bold mb-2">
-												{game.type === 'draw' ? 'DIBUJA:' : 'LA PALABRA ES:'}
+												{game.type === 'draw' ? t('reveal.draw') : t('reveal.theWordIs')}
 											</p>
 											<h3 class="font-headline text-5xl font-bold text-primary neon-glow-primary tracking-tighter">{revealedRole.word}</h3>
 										{/if}
@@ -708,7 +709,7 @@
 									class="mt-12 flex items-center gap-3 bg-surface-container-low hover:bg-surface-container-high text-on-surface px-8 py-4 rounded-xl border border-outline-variant/30 transition-all active:scale-95"
 								>
 									<span class="iconify material-symbols--visibility-off text-primary"></span>
-									<span class="font-headline font-bold text-sm tracking-widest uppercase">OCULTAR</span>
+									<span class="font-headline font-bold text-sm tracking-widest uppercase">{t('reveal.hide')}</span>
 								</button>
 							{/if}
 						{/if}
@@ -720,11 +721,11 @@
 					<span class="iconify material-symbols--warning text-tertiary shrink-0"></span>
 					<p class="text-xs text-on-surface-variant font-medium leading-relaxed">
 						{#if game.type === 'fact'}
-							Asegúrate de que nadie más esté mirando la pantalla. Memoriza tu dato y no lo leas textualmente durante la discusión.
+							{t('reveal.warningFact')}
 						{:else if game.type === 'draw'}
-							Nadie más debe ver tu pantalla. Memoriza bien la palabra.
+							{t('reveal.warningDraw')}
 						{:else}
-							Asegúrate de que nadie más esté mirando la pantalla antes de revelar tu palabra secreta.
+							{t('reveal.warningWord')}
 						{/if}
 					</p>
 				</div>
@@ -739,7 +740,7 @@
 					class="w-full max-w-xs flex items-center justify-center gap-3 bg-linear-to-r from-primary-dim to-primary text-on-primary-fixed rounded-2xl py-4 active:scale-95 transition-all shadow-[0_0_20px_rgba(156,66,244,0.4)]"
 				>
 					<span class="iconify material-symbols--arrow-forward text-2xl"></span>
-					<span class="font-headline font-black text-lg uppercase tracking-tight">Siguiente Jugador</span>
+					<span class="font-headline font-black text-lg uppercase tracking-tight">{t('reveal.nextPlayer')}</span>
 				</button>
 			{:else}
 				<button
@@ -748,7 +749,7 @@
 				>
 					<span class="iconify {game.type === 'draw' ? 'material-symbols--draw' : 'material-symbols--play-arrow'} text-2xl"></span>
 					<span class="font-headline font-black text-lg uppercase tracking-tight">
-						{game.type === 'draw' ? '¡A Dibujar!' : game.type === 'fact' ? '¡Empezar Discusión!' : '¡Empezar Partida!'}
+						{game.type === 'draw' ? t('reveal.startDrawing') : game.type === 'fact' ? t('reveal.startDiscussion') : t('reveal.startGame')}
 					</span>
 				</button>
 			{/if}
@@ -762,12 +763,12 @@
 				<section class="mb-10 text-center relative">
 					<div class="inline-block px-4 py-1 rounded-full {isGreen ? 'bg-secondary-container/20 border border-secondary/30' : 'bg-primary-container/20 border border-primary/30'} mb-4">
 						<span class="font-headline {isGreen ? 'text-secondary' : 'text-primary-dim'} text-xs font-bold tracking-widest uppercase">
-							{game.type === 'fact' ? 'Discusión en Curso' : 'Partida en Curso'}
+							{game.type === 'fact' ? t('playing.discussion') : t('playing.inProgress')}
 						</span>
 					</div>
 					{#if game.type === 'fact'}
 						<p class="text-on-surface-variant text-sm mb-4 max-w-md mx-auto">
-							Cada jugador comenta sobre su dato curioso. ¡Descubran quién tiene el dato falso!
+							{t('playing.factInstructions')}
 						</p>
 					{/if}
 					<div class="relative py-8">
@@ -777,7 +778,7 @@
 						<h2 class="font-headline text-6xl lg:text-8xl font-bold tracking-tighter {isGreen ? 'text-primary' : 'text-primary-dim'} drop-shadow-[0_0_15px_rgba(202,152,255,0.4)]">
 							{formatTime((gameState as any).timerRemaining)}
 						</h2>
-						<p class="font-body text-on-surface-variant text-sm mt-2 font-medium">TIEMPO RESTANTE PARA VOTAR</p>
+						<p class="font-body text-on-surface-variant text-sm mt-2 font-medium">{t('playing.timeRemaining')}</p>
 					</div>
 					<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden mt-6">
 						<div
@@ -791,10 +792,10 @@
 			<!-- Player List -->
 			<section class="lg:sticky lg:top-24">
 				<div class="flex items-center justify-between mb-6">
-					<h4 class="font-headline text-lg font-bold tracking-tight">JUGADORES ({alivePlayers.length})</h4>
+					<h4 class="font-headline text-lg font-bold tracking-tight">{t('playing.playersCount', { count: alivePlayers.length })}</h4>
 					<div class="flex items-center gap-2">
 						<div class="w-2 h-2 rounded-full {isGreen ? 'bg-secondary' : 'bg-primary'} animate-pulse"></div>
-						<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">En Vivo</span>
+						<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">{t('playing.live')}</span>
 					</div>
 				</div>
 				<div class="grid grid-cols-1 gap-3">
@@ -806,7 +807,7 @@
 							<div>
 								<p class="font-body font-bold text-on-surface">{player.name}</p>
 								<p class="text-[10px] {player.eliminated ? 'text-tertiary' : 'text-on-surface-variant'} font-bold uppercase tracking-tighter">
-									{player.eliminated ? 'Eliminado' : 'En juego'}
+									{player.eliminated ? t('playing.eliminated') : t('playing.inGame')}
 								</p>
 							</div>
 						</div>
@@ -822,7 +823,7 @@
 				class="w-full max-w-xs flex items-center justify-center gap-3 bg-linear-to-r from-tertiary-dim to-tertiary text-on-tertiary-fixed rounded-2xl py-4 active:scale-95 transition-all shadow-[0_0_20px_rgba(255,112,115,0.3)]"
 			>
 				<span class="iconify material-symbols--how-to-vote text-2xl"></span>
-				<span class="font-headline font-black text-lg uppercase tracking-tight">Votar Ahora</span>
+				<span class="font-headline font-black text-lg uppercase tracking-tight">{t('playing.voteNow')}</span>
 			</button>
 		</nav>
 
@@ -832,14 +833,14 @@
 			<div>
 				<div class="text-center mb-6">
 					<div class="inline-block px-4 py-1 rounded-full bg-primary-dim/10 border border-primary/30 mb-3">
-						<span class="font-headline text-primary-dim text-xs font-bold tracking-widest uppercase">Ronda {(gameState as any).currentRound} de {(gameState as any).config.rounds}</span>
+						<span class="font-headline text-primary-dim text-xs font-bold tracking-widest uppercase">{t('drawing.roundOf', { current: (gameState as any).currentRound, total: (gameState as any).config.rounds })}</span>
 					</div>
 					{#if currentDrawer}
 						<h2 class="font-headline text-3xl lg:text-4xl font-bold tracking-tight">
 							Turno de <span class="text-primary-dim">{currentDrawer.name}</span>
 						</h2>
 					{/if}
-					<p class="text-on-surface-variant text-sm mt-1">Dibuja un trazo y pasa el móvil</p>
+					<p class="text-on-surface-variant text-sm mt-1">{t('drawing.drawAndPass')}</p>
 				</div>
 
 				<!-- Timer -->
@@ -863,14 +864,14 @@
 				/>
 
 				{#if hasDrawnStroke}
-					<p class="text-center text-primary-dim font-bold text-sm mt-4 animate-pulse">¡Trazo registrado! Pasa el dispositivo.</p>
+					<p class="text-center text-primary-dim font-bold text-sm mt-4 animate-pulse">{t('drawing.strokeDone')}</p>
 				{/if}
 			</div>
 
 			<!-- Sidebar: Player order -->
 			<div class="hidden lg:block lg:sticky lg:top-24">
 				<div class="glass-panel rounded-2xl p-5 border border-outline-variant/10">
-					<h4 class="font-headline text-sm font-bold tracking-tight mb-4 uppercase text-on-surface-variant">Orden de dibujo</h4>
+					<h4 class="font-headline text-sm font-bold tracking-tight mb-4 uppercase text-on-surface-variant">{t('drawing.order')}</h4>
 					{#each alivePlayers as player, i}
 						<div class="flex items-center gap-3 py-2 {i === (gameState as any).currentDrawerIndex ? 'text-primary-dim' : 'text-on-surface-variant opacity-50'}">
 							<div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold font-headline ring-2"
@@ -899,7 +900,7 @@
 				class="w-full max-w-xs flex items-center justify-center gap-3 bg-linear-to-r from-primary-dim to-primary text-on-primary-fixed rounded-2xl py-4 active:scale-95 transition-all shadow-[0_0_20px_rgba(156,66,244,0.3)] disabled:opacity-40"
 			>
 				<span class="iconify material-symbols--arrow-forward text-2xl"></span>
-				<span class="font-headline font-black text-lg uppercase tracking-tight">{hasDrawnStroke ? 'Pasar Turno' : 'Dibuja un trazo'}</span>
+				<span class="font-headline font-black text-lg uppercase tracking-tight">{hasDrawnStroke ? t('drawing.passTurn') : t('drawing.drawStroke')}</span>
 			</button>
 		</nav>
 
@@ -907,10 +908,10 @@
 	{:else if gameState.phase === 'voting'}
 		<section class="text-center mb-8">
 			<div class="inline-block px-4 py-1 rounded-full bg-tertiary/10 border border-tertiary/30 mb-4">
-				<span class="font-headline text-tertiary text-xs font-bold tracking-widest uppercase">Votación</span>
+				<span class="font-headline text-tertiary text-xs font-bold tracking-widest uppercase">{t('voting.title')}</span>
 			</div>
-			<h2 class="font-headline text-3xl font-bold tracking-tight">{game.votingTitle}</h2>
-			<p class="text-on-surface-variant mt-2 text-sm">{game.votingSubtitle}</p>
+			<h2 class="font-headline text-3xl font-bold tracking-tight">{t(`game.${game.id}.votingTitle`)}</h2>
+			<p class="text-on-surface-variant mt-2 text-sm">{t(`game.${game.id}.votingSubtitle`)}</p>
 		</section>
 
 		<!-- Show drawing before voting (draw only) -->
@@ -952,7 +953,7 @@
 				class="w-full max-w-xs flex items-center justify-center gap-3 bg-linear-to-r from-tertiary-dim to-tertiary text-on-tertiary-fixed rounded-2xl py-4 active:scale-95 transition-all disabled:opacity-40"
 			>
 				<span class="iconify material-symbols--gavel text-2xl"></span>
-				<span class="font-headline font-black text-lg uppercase tracking-tight">Confirmar Voto</span>
+				<span class="font-headline font-black text-lg uppercase tracking-tight">{t('voting.confirm')}</span>
 			</button>
 		</nav>
 
@@ -963,7 +964,7 @@
 
 			<div class="mb-8">
 				<div class="inline-flex items-center gap-2 bg-tertiary/10 px-4 py-1.5 rounded-full border border-tertiary/20 mb-4">
-					<span class="font-headline text-tertiary text-xs font-bold tracking-widest uppercase">Resultado Final</span>
+					<span class="font-headline text-tertiary text-xs font-bold tracking-widest uppercase">{t('results.finalResult')}</span>
 				</div>
 			</div>
 
@@ -974,9 +975,9 @@
 						{imp.name.charAt(0).toUpperCase()}
 					</div>
 					<h2 class="font-headline text-4xl font-bold tracking-tight text-tertiary neon-glow-primary">{imp.name.toUpperCase()}</h2>
-					<p class="text-tertiary font-headline uppercase tracking-widest text-sm font-bold mt-2">Era el Impostor</p>
+					<p class="text-tertiary font-headline uppercase tracking-widest text-sm font-bold mt-2">{t('results.wasImpostor')}</p>
 					{#if game.type === 'fact'}
-						<p class="text-on-surface-variant text-xs mt-1">Inventó su dato curioso</p>
+						<p class="text-on-surface-variant text-xs mt-1">{t('results.inventedFact')}</p>
 					{/if}
 				</div>
 			{/each}
@@ -992,12 +993,12 @@
 			{#if game.type === 'word' || game.type === 'draw'}
 				<div class="w-full max-w-sm glass-panel rounded-2xl p-6 border border-outline-variant/20 mb-8">
 					<div class="mb-4">
-						<p class="text-on-surface-variant text-xs uppercase tracking-widest font-bold mb-1">Palabra Secreta</p>
+						<p class="text-on-surface-variant text-xs uppercase tracking-widest font-bold mb-1">{t('results.secretWord')}</p>
 						<h3 class="font-headline text-3xl font-bold text-primary neon-glow-primary">{(results as any).secretWord}</h3>
 					</div>
 					<div class="h-px bg-outline-variant/20 my-4"></div>
 					<div>
-						<p class="text-on-surface-variant text-xs uppercase tracking-widest font-bold mb-1">Palabra del Impostor</p>
+						<p class="text-on-surface-variant text-xs uppercase tracking-widest font-bold mb-1">{t('results.impostorWord')}</p>
 						<h3 class="font-headline text-3xl font-bold text-tertiary">{(results as any).impostorWord || '???'}</h3>
 					</div>
 				</div>
@@ -1018,12 +1019,12 @@
 								<div>
 									<p class="font-bold text-sm text-on-surface">{player.name}</p>
 									<p class="text-[10px] uppercase tracking-widest font-bold {role?.role === 'impostor' ? 'text-tertiary' : 'text-primary-dim'}">
-										{role?.role === 'impostor' ? 'Impostor' : game.citizenLabel}
+										{role?.role === 'impostor' ? t('results.impostor') : t(`game.${game.id}.citizenLabel`)}
 									</p>
 								</div>
 							</div>
 							<p class="text-xs text-on-surface-variant leading-relaxed pl-13">
-								{role?.role === 'impostor' ? '(Inventó su dato)' : (role as any)?.fact}
+								{role?.role === 'impostor' ? t('results.inventedFactShort') : (role as any)?.fact}
 							</p>
 						</div>
 					{/each}
@@ -1043,7 +1044,7 @@
 							</div>
 							<p class="font-bold text-sm text-on-surface">{player.name}</p>
 							<p class="text-[10px] uppercase tracking-widest font-bold {role?.role === 'impostor' ? 'text-tertiary' : (isGreen ? 'text-secondary' : 'text-primary-dim')}">
-								{role?.role === 'impostor' ? 'Impostor' : game.citizenLabel}
+								{role?.role === 'impostor' ? t('results.impostor') : t(`game.${game.id}.citizenLabel`)}
 							</p>
 						</div>
 					{/each}

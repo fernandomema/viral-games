@@ -1,10 +1,17 @@
 <script lang="ts">
 	import './layout.css';
+	import '$lib/i18n/register';
 	import { onNavigate, goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { browser } from '$app/environment';
+	import { detectLocale, t } from '$lib/i18n';
 
 	let { children } = $props();
+
+	// Detect locale from browser settings
+	if (browser) {
+		detectLocale();
+	}
 
 	// Auto-redirect to /discord/[game] when running inside a Discord Activity iframe
 	if (browser && !page.url.pathname.startsWith('/discord')) {
@@ -27,7 +34,7 @@
 </script>
 
 <svelte:head>
-	<meta name="description" content="Juegos sociales para jugar con amigos pasando el móvil" />
+	<meta name="description" content={t('home.meta')} />
 </svelte:head>
 
 <div class="min-h-dvh bg-background text-on-background font-body selection:bg-primary/30">

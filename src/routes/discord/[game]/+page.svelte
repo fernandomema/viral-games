@@ -1,21 +1,22 @@
 <script lang="ts">
 	import { DiscordSDK } from '@discord/embedded-app-sdk';
 	import type { GameDef } from '$lib/games/registry';
-	import { WORD_CATEGORIES } from '$lib/games/impostor';
-	import { DRAW_CATEGORIES } from '$lib/games/impostor-draw';
-	import { FACT_CATEGORIES } from '$lib/games/impostor-datos';
+	import { getWordCategories } from '$lib/games/impostor';
+	import { getDrawCategories } from '$lib/games/impostor-draw';
+	import { getFactCategories } from '$lib/games/impostor-datos';
 	import { haptic, hapticTap } from '$lib/haptics';
 	import ShopModal from '$lib/shop/ShopModal.svelte';
 	import { initShop, getActiveBackground, getActivePlayerFrame, getActiveVoteEffect } from '$lib/shop';
+	import { t, detectLocale } from '$lib/i18n';
 
 	let { data } = $props();
 	let game: GameDef = $derived(data.game);
 
 	// Categories based on game type
 	let categories = $derived(
-		game.type === 'word' ? WORD_CATEGORIES :
-		game.type === 'draw' ? DRAW_CATEGORIES :
-		FACT_CATEGORIES
+		game.type === 'word' ? getWordCategories() :
+		game.type === 'draw' ? getDrawCategories() :
+		getFactCategories()
 	);
 
 	// ── State ─────────────────────────────────────────────────────
@@ -64,6 +65,14 @@
 			const discordSdk = new DiscordSDK(clientId);
 			await discordSdk.ready();
 
+			// Detect locale from Discord user settings
+			try {
+				const { locale } = await discordSdk.commands.userSettingsGetLocale();
+				detectLocale(locale);
+			} catch {
+				detectLocale();
+			}
+
 			phase = 'authenticating';
 
 			const { code } = await discordSdk.commands.authorize({
@@ -84,7 +93,7 @@
 			const { access_token } = tokenData;
 
 			const auth = await discordSdk.commands.authenticate({ access_token });
-			if (!auth) throw new Error('Autenticación fallida');
+			if (!auth) throw new Error(t('discord.authFailed'));
 
 			myDiscordUserId = auth.user.id;
 			myUserName = auth.user.global_name || auth.user.username;
@@ -96,7 +105,7 @@
 			connectWebSocket(roomId);
 		} catch (err: any) {
 			console.error('Discord init error:', err);
-			errorMsg = err.message || 'Error conectando con Discord';
+			errorMsg = err.message || t('discord.connectError');
 			phase = 'error';
 		}
 	}
@@ -236,7 +245,7 @@
 		<div class="flex-1 flex flex-col items-center justify-center gap-3">
 			<span class="iconify material-symbols--sports-esports text-5xl text-primary animate-pulse"></span>
 			<p class="text-on-surface-variant">
-				{phase === 'connecting' ? 'Conectando con Discord...' : 'Autenticando...'}
+				{phase === 'connecting' ? t('discord.connecting') : t('discord.authenticating')}
 			</p>
 		</div>
 
@@ -258,7 +267,7 @@
 						<span class="iconify {game.headerIcon} text-2xl text-secondary"></span>
 						<span class="text-on-surface">{@html game.cardTitleHtml}</span>
 					</h1>
-					<p class="text-on-surface-variant text-xs">{gameState.players.length} jugadores</p>
+					<p class="text-on-surface-variant text-xs">{t('discord.playersCount', { count: gameState.players.length })}</p>
 				</div>
 				<div class="flex-1 flex justify-end">
 					<button onclick={() => { shopOpen = true; hapticTap(); }}
@@ -285,7 +294,7 @@
 				<div class="bg-surface-container rounded-xl p-3 flex flex-col gap-3 min-h-0 overflow-y-auto">
 					<!-- Category pills -->
 					<div>
-						<span class="text-xs text-on-surface-variant font-medium mb-1.5 block uppercase tracking-wider">Categoría</span>
+						<span class="text-xs text-on-surface-variant font-medium mb-1.5 block uppercase tracking-wider">{t('game.category')}</span>
 						<div class="flex flex-wrap gap-1.5">
 							{#each categories as cat}
 								<button
@@ -302,7 +311,7 @@
 					<!-- Impostors + Timer row -->
 					<div class="flex items-center gap-4">
 						<div class="flex items-center gap-2 flex-1">
-							<span class="text-xs text-on-surface-variant font-medium">Impostores</span>
+							<span class="text-xs text-on-surface-variant font-medium">{t('game.impostors')}</span>
 							<div class="flex items-center gap-1.5 ml-auto">
 								<button onclick={() => { configImpostors = Math.max(1, configImpostors - 1); hapticTap(); }} class="w-6 h-6 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface-variant text-xs hover:bg-surface-container-high">−</button>
 								<span class="text-primary font-bold w-4 text-center text-sm">{configImpostors}</span>
@@ -312,12 +321,12 @@
 						<div class="w-px h-6 bg-outline-variant/20"></div>
 						{#if game.type === 'draw'}
 							<div class="flex items-center gap-2 flex-1">
-								<span class="text-xs text-on-surface-variant font-medium">Turno</span>
+								<span class="text-xs text-on-surface-variant font-medium">{t('discord.turn')}</span>
 								<span class="text-primary font-bold text-sm ml-auto">{configTurnTimer}s</span>
 							</div>
 						{:else}
 							<div class="flex items-center gap-2 flex-1">
-								<span class="text-xs text-on-surface-variant font-medium">Timer</span>
+								<span class="text-xs text-on-surface-variant font-medium">{t('game.timer')}</span>
 								<span class="text-primary font-bold text-sm ml-auto">{formatTime(configTimer)}</span>
 							</div>
 						{/if}
@@ -328,7 +337,7 @@
 							class="w-full accent-primary h-1" />
 						<div class="flex items-center gap-4">
 							<div class="flex items-center gap-2 flex-1">
-								<span class="text-xs text-on-surface-variant font-medium">Rondas</span>
+								<span class="text-xs text-on-surface-variant font-medium">{t('game.rounds')}</span>
 								<div class="flex items-center gap-1.5 ml-auto">
 									<button onclick={() => { configRounds = Math.max(1, configRounds - 1); hapticTap(); }} class="w-6 h-6 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface-variant text-xs hover:bg-surface-container-high">−</button>
 									<span class="text-primary font-bold w-4 text-center text-sm">{configRounds}</span>
@@ -344,7 +353,7 @@
 					<!-- Hint toggle (word + draw only) -->
 					{#if game.type !== 'fact'}
 						<label class="flex items-center justify-between cursor-pointer">
-							<span class="text-xs text-on-surface-variant font-medium">Pista al impostor</span>
+							<span class="text-xs text-on-surface-variant font-medium">{t('game.impostorHint')}</span>
 							<input type="checkbox" bind:checked={configHint} class="accent-primary" />
 						</label>
 					{/if}
@@ -360,13 +369,13 @@
 							: 'bg-surface-container-highest text-on-surface-variant/50 cursor-not-allowed'}"
 				>
 					{gameState.players.length < 3
-						? `Faltan ${3 - gameState.players.length} jugadores`
-						: '¡Empezar!'}
+					? t('discord.missing', { count: 3 - gameState.players.length })
+					: t('discord.letsGo')}
 				</button>
 			{:else}
 				<div class="flex-1 flex flex-col items-center justify-center">
 					<span class="iconify material-symbols--hourglass-top text-2xl text-on-surface-variant/50 mb-1"></span>
-					<p class="text-on-surface-variant text-sm">Esperando al host...</p>
+					<p class="text-on-surface-variant text-sm">{t('discord.waitingHost')}</p>
 				</div>
 			{/if}
 		</div>
@@ -379,7 +388,7 @@
 				{@const tRemaining = gameState.turnTimerRemaining ?? 0}
 				{@const drawer = gameState.players[gameState.currentDrawerIndex ?? 0]}
 				<div class="text-center">
-					<p class="text-on-surface-variant text-xs">Ronda {gameState.currentRound ?? 1} — Turno de</p>
+					<p class="text-on-surface-variant text-xs">{t('discord.roundTurnOf', { round: gameState.currentRound ?? 1 })}</p>
 					<p class="text-primary font-bold text-lg font-headline">{drawer?.name ?? '...'}</p>
 					<p class="text-3xl font-bold font-headline tracking-tighter {tRemaining <= 5 ? 'text-error animate-pulse' : 'text-primary'}">
 						{tRemaining}s
@@ -395,19 +404,19 @@
 			<div class="w-full bg-surface-container rounded-xl p-4 text-center">
 				{#if myRole.role === 'impostor'}
 					<span class="iconify material-symbols--person-alert text-3xl text-error"></span>
-					<p class="text-error font-bold text-lg font-headline">¡Eres el IMPOSTOR!</p>
+					<p class="text-error font-bold text-lg font-headline">{t('discord.youAreImpostor')}</p>
 					{#if myRoleWord && myRoleWord !== '???' && myRoleWord !== ''}
-						<p class="text-on-surface-variant text-sm">Pista: <span class="text-error font-bold">{myRoleWord}</span></p>
+						<p class="text-on-surface-variant text-sm">{t('discord.hintLabel')} <span class="text-error font-bold">{myRoleWord}</span></p>
 					{:else}
-						<p class="text-on-surface-variant text-xs">Sin pista — improvisa</p>
+						<p class="text-on-surface-variant text-xs">{t('discord.noHint')}</p>
 					{/if}
 				{:else}
 					<span class="iconify material-symbols--shield-person text-3xl text-secondary"></span>
-					<p class="text-secondary font-bold text-lg font-headline">{game.citizenLabel}</p>
+					<p class="text-secondary font-bold text-lg font-headline">{t(`game.${game.id}.citizenLabel`)}</p>
 					{#if game.type === 'fact'}
-						<p class="text-on-surface-variant text-sm">Tu dato: <span class="text-secondary font-bold">{myRoleWord}</span></p>
+						<p class="text-on-surface-variant text-sm">{t('discord.yourFact')} <span class="text-secondary font-bold">{myRoleWord}</span></p>
 					{:else}
-						<p class="text-on-surface-variant text-sm">Tu palabra: <span class="text-secondary font-bold">{myRoleWord}</span></p>
+						<p class="text-on-surface-variant text-sm">{t('discord.yourWord')} <span class="text-secondary font-bold">{myRoleWord}</span></p>
 					{/if}
 				{/if}
 			</div>
@@ -416,23 +425,23 @@
 			<p class="text-on-surface-variant text-xs text-center px-4">
 				{#if game.type === 'fact'}
 					{myRole.role === 'impostor'
-						? 'Lee tu dato falso como si fuera verdad. No dejes que te descubran.'
-						: 'Comparte tu dato real. Observa quién podría tener el dato falso.'}
+					? t('discord.factImpostorTip')
+					: t('discord.factCitizenTip')}
 				{:else if game.type === 'draw'}
-					{myRole.role === 'impostor'
-						? 'Dibuja algo que parezca la palabra sin conocerla.'
-						: 'Dibuja la palabra secreta. Observa quién dibuja algo extraño.'}
+				{myRole.role === 'impostor'
+					? t('discord.drawImpostorTip')
+					: t('discord.drawCitizenTip')}
 				{:else}
-					{myRole.role === 'impostor'
-						? 'Describe la palabra sin que descubran que no la conoces.'
-						: 'Describe tu palabra con cuidado — el impostor te escucha.'}
+				{myRole.role === 'impostor'
+					? t('discord.wordImpostorTip')
+					: t('discord.wordCitizenTip')}
 				{/if}
 			</p>
 
 			{#if isHost}
 				<button onclick={skipToVoting}
 					class="px-5 py-1.5 rounded-lg bg-surface-container-highest text-on-surface-variant text-sm font-medium hover:bg-surface-container-high transition-all active:scale-95">
-					Saltar a votación
+					{t('discord.skipToVoting')}
 				</button>
 			{/if}
 		</div>
@@ -442,9 +451,9 @@
 		<div class="flex-1 flex flex-col gap-3 max-w-md mx-auto w-full">
 			<div class="text-center py-1">
 				<span class="iconify material-symbols--how-to-vote text-3xl text-primary"></span>
-				<h2 class="text-xl font-bold font-headline">{game.votingTitle}</h2>
+				<h2 class="text-xl font-bold font-headline">{t(`game.${game.id}.votingTitle`)}</h2>
 				<p class="text-on-surface-variant text-xs">
-					{myVoteSubmitted ? 'Voto registrado' : game.votingSubtitle}
+					{myVoteSubmitted ? t('voting.voteRegistered') : t(`game.${game.id}.votingSubtitle`)}
 				</p>
 			</div>
 
@@ -476,7 +485,7 @@
 			{#if myVoteSubmitted}
 				<div class="bg-surface-container rounded-lg p-2.5 text-center shrink-0">
 					<span class="iconify material-symbols--pending text-xl text-primary"></span>
-					<p class="text-on-surface-variant text-xs">Esperando a los demás...</p>
+					<p class="text-on-surface-variant text-xs">{t('voting.waitingOthers')}</p>
 				</div>
 			{/if}
 		</div>
@@ -491,12 +500,12 @@
 				{#if isImpostor}
 					<span class="iconify {impostorCaught ? 'material-symbols--sentiment-very-dissatisfied' : 'material-symbols--celebration'} text-5xl {impostorCaught ? 'text-error' : 'text-secondary'}"></span>
 					<h2 class="text-xl font-bold font-headline">
-						{impostorCaught ? '¡Te descubrieron!' : '¡Escapaste!'}
+						{impostorCaught ? t('discord.caught') : t('discord.escaped')}
 					</h2>
 				{:else}
 					<span class="iconify {impostorCaught ? 'material-symbols--celebration' : 'material-symbols--sentiment-very-dissatisfied'} text-5xl {impostorCaught ? 'text-secondary' : 'text-error'}"></span>
 					<h2 class="text-xl font-bold font-headline">
-						{impostorCaught ? '¡Impostor atrapado!' : '¡El impostor escapó!'}
+						{impostorCaught ? t('discord.impostorCaught') : t('discord.impostorEscaped')}
 					</h2>
 				{/if}
 			</div>
@@ -505,14 +514,14 @@
 			<div class="w-full grid grid-cols-2 gap-2">
 				{#if impostorNames.length > 0}
 					<div class="bg-surface-container rounded-xl p-3 text-center">
-						<p class="text-on-surface-variant text-[10px] uppercase tracking-wider">{impostorNames.length === 1 ? 'Impostor' : 'Impostores'}</p>
+						<p class="text-on-surface-variant text-[10px] uppercase tracking-wider">{impostorNames.length === 1 ? t('results.impostor') : t('results.impostors')}</p>
 						<p class="text-error font-bold text-sm">{impostorNames.join(', ')}</p>
 					</div>
 				{/if}
 
 				{#each gameState.players.filter((p: any) => p.eliminated) as eliminated}
 					<div class="bg-surface-container rounded-xl p-3 text-center">
-						<p class="text-on-surface-variant text-[10px] uppercase tracking-wider">Eliminado</p>
+						<p class="text-on-surface-variant text-[10px] uppercase tracking-wider">{t('discord.eliminated')}</p>
 						<p class="text-on-surface font-bold text-sm">{eliminated.name}</p>
 					</div>
 				{/each}
@@ -521,25 +530,25 @@
 					<!-- Fact game: show real fact + fake fact -->
 					{#if gameState.realFact}
 						<div class="bg-surface-container rounded-xl p-3 text-center">
-							<p class="text-on-surface-variant text-[10px] uppercase tracking-wider">Dato real</p>
+							<p class="text-on-surface-variant text-[10px] uppercase tracking-wider">{t('results.realFact')}</p>
 							<p class="text-secondary font-bold text-xs">{gameState.realFact}</p>
 						</div>
 					{/if}
 					{#if gameState.fakeFact}
 						<div class="bg-surface-container rounded-xl p-3 text-center">
-							<p class="text-on-surface-variant text-[10px] uppercase tracking-wider">Dato falso</p>
+							<p class="text-on-surface-variant text-[10px] uppercase tracking-wider">{t('results.fakeFact')}</p>
 							<p class="text-error font-bold text-xs">{gameState.fakeFact}</p>
 						</div>
 					{/if}
 				{:else}
 					<!-- Word/Draw: show secret word + impostor hint -->
 					<div class="bg-surface-container rounded-xl p-3 text-center">
-						<p class="text-on-surface-variant text-[10px] uppercase tracking-wider">Palabra</p>
+						<p class="text-on-surface-variant text-[10px] uppercase tracking-wider">{t('results.word')}</p>
 						<p class="text-secondary font-bold text-sm">{gameState.secretWord}</p>
 					</div>
 					{#if gameState.impostorWord}
 						<div class="bg-surface-container rounded-xl p-3 text-center">
-							<p class="text-on-surface-variant text-[10px] uppercase tracking-wider">Pista impostor</p>
+							<p class="text-on-surface-variant text-[10px] uppercase tracking-wider">{t('results.impostorHint')}</p>
 							<p class="text-error font-bold text-sm">{gameState.impostorWord}</p>
 						</div>
 					{/if}
@@ -549,10 +558,10 @@
 			{#if isHost}
 				<button onclick={playAgain}
 					class="w-full py-2.5 rounded-xl bg-primary text-on-primary font-bold font-headline hover:brightness-110 active:scale-[0.98] transition-all">
-					Jugar otra vez
+					{t('discord.playAgain')}
 				</button>
 			{:else}
-				<p class="text-on-surface-variant text-xs">Esperando al host...</p>
+				<p class="text-on-surface-variant text-xs">{t('discord.waitingHost')}</p>
 			{/if}
 		</div>
 	{/if}
