@@ -68,6 +68,41 @@ app.get('/api/health', (_req, res) => {
 	res.json({ ok: true });
 });
 
+// ── Entitlements (server-side verification) ───────────────────
+app.get('/api/entitlements/:userId', async (req, res) => {
+	const { userId } = req.params;
+	const clientId = process.env.VITE_DISCORD_CLIENT_ID;
+	const clientSecret = process.env.DISCORD_CLIENT_SECRET;
+
+	if (!clientId || !clientSecret) {
+		res.status(500).json({ error: 'Missing Discord credentials' });
+		return;
+	}
+
+	try {
+		const response = await fetch(
+			`https://discord.com/api/v10/applications/${clientId}/entitlements?user_id=${encodeURIComponent(userId)}&exclude_ended=true`,
+			{
+				headers: {
+					Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
+				},
+			}
+		);
+
+		if (!response.ok) {
+			console.error('[Entitlements] Discord API error:', response.status);
+			res.status(response.status).json({ error: 'Discord API error' });
+			return;
+		}
+
+		const entitlements = await response.json();
+		res.json({ entitlements });
+	} catch (err) {
+		console.error('[Entitlements] Failed:', err);
+		res.status(500).json({ error: 'Failed to fetch entitlements' });
+	}
+});
+
 // ── HTTP + WebSocket server ───────────────────────────────────
 const server = createServer(app);
 const wss = new WebSocketServer({ server, path: '/ws' });

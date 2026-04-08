@@ -5,6 +5,8 @@
 	import { DRAW_CATEGORIES } from '$lib/games/impostor-draw';
 	import { FACT_CATEGORIES } from '$lib/games/impostor-datos';
 	import { haptic, hapticTap } from '$lib/haptics';
+	import ShopModal from '$lib/shop/ShopModal.svelte';
+	import { initShop, getActiveBackground, getActivePlayerFrame, getActiveVoteEffect } from '$lib/shop';
 
 	let { data } = $props();
 	let game: GameDef = $derived(data.game);
@@ -35,6 +37,12 @@
 	let configHint = $state(true);
 	let configTurnTimer = $state(15);
 	let configRounds = $state(2);
+
+	// Shop
+	let shopOpen = $state(false);
+	let activeBg = $derived(getActiveBackground());
+	let activeFrame = $derived(getActivePlayerFrame());
+	let activeVoteEffect = $derived(getActiveVoteEffect());
 
 	let ws: WebSocket | null = null;
 
@@ -80,6 +88,9 @@
 
 			myDiscordUserId = auth.user.id;
 			myUserName = auth.user.global_name || auth.user.username;
+
+			// Init shop with Discord SDK for IAP
+			initShop(discordSdk);
 
 			const roomId = `${discordSdk.channelId || discordSdk.instanceId}-${game.id}`;
 			connectWebSocket(roomId);
@@ -213,7 +224,12 @@
 	});
 </script>
 
-<div class="h-dvh bg-background text-on-background p-3 flex flex-col overflow-hidden">
+<div class="h-dvh text-on-background p-3 flex flex-col overflow-hidden relative"
+		 style="background: {activeBg.css};">
+	{#if activeBg.overlayCSS}
+		<div class="absolute inset-0 pointer-events-none" style="background: {activeBg.overlayCSS};"></div>
+	{/if}
+	<div class="relative flex flex-col flex-1 overflow-hidden">
 
 	<!-- Connecting / Authenticating -->
 	{#if phase === 'connecting' || phase === 'authenticating'}
@@ -235,12 +251,21 @@
 	{:else if phase === 'lobby' && gameState}
 		<div class="flex flex-col gap-3 max-w-md mx-auto w-full flex-1 overflow-hidden">
 			<!-- Compact header -->
-			<div class="text-center py-1">
-				<h1 class="text-xl font-bold font-headline tracking-tight inline-flex items-center gap-2">
-					<span class="iconify {game.headerIcon} text-2xl text-secondary"></span>
-					<span class="text-on-surface">{@html game.cardTitleHtml}</span>
-				</h1>
-				<p class="text-on-surface-variant text-xs">{gameState.players.length} jugadores</p>
+			<div class="flex items-center justify-between py-1">
+				<div class="flex-1"></div>
+				<div class="text-center">
+					<h1 class="text-xl font-bold font-headline tracking-tight inline-flex items-center gap-2">
+						<span class="iconify {game.headerIcon} text-2xl text-secondary"></span>
+						<span class="text-on-surface">{@html game.cardTitleHtml}</span>
+					</h1>
+					<p class="text-on-surface-variant text-xs">{gameState.players.length} jugadores</p>
+				</div>
+				<div class="flex-1 flex justify-end">
+					<button onclick={() => { shopOpen = true; hapticTap(); }}
+						class="w-8 h-8 rounded-full bg-surface-container-high/60 flex items-center justify-center text-primary hover:bg-surface-container-highest transition-colors">
+						<span class="iconify material-symbols--storefront text-lg"></span>
+					</button>
+				</div>
 			</div>
 
 			<!-- Player list -->
@@ -440,6 +465,9 @@
 						>
 							<span class="iconify {isSelected ? 'material-symbols--check-circle' : 'material-symbols--person'} text-lg"></span>
 							<span class="font-medium text-sm">{player.name}</span>
+							{#if isSelected && activeVoteEffect.emoji}
+								<span class="ml-auto text-base">{activeVoteEffect.emoji}</span>
+							{/if}
 						</button>
 					{/if}
 				{/each}
@@ -528,4 +556,7 @@
 			{/if}
 		</div>
 	{/if}
+	</div><!-- /relative wrapper -->
 </div>
+
+<ShopModal bind:open={shopOpen} />
