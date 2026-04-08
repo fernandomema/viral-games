@@ -1,22 +1,11 @@
-# sv
+<h1 align="center" id="title">Tragos Locos - Party drinking game</h1>
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+<p align="center"><img src="https://socialify.git.ci/fernandomema/viral-games/image?language=1&logo=https%3A%2F%2Fgithub.com%2Ffernandomema%2Fviral-games%2Fblob%2Fmaster%2Fstatic%2FAppImages%2Fios%2F256.png%3Fraw%3Dtrue&amp;name=1&amp;owner=1&amp;stargazers=1&amp;theme=Light" alt="project-image"></p>
 
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
-
-```sh
-# create a new project
-npx sv create my-app
-```
-
-To recreate this project with the same configuration:
-
-```sh
-# recreate this project
-npx sv@0.14.1 create --template minimal --types ts --add tailwindcss="plugins:none" sveltekit-adapter="adapter:static" devtools-json --install npm viral-games
-```
+<p id="description">
+    description WIP
+</p>
+<h2>📸 Screenshots</h2>
 
 ## Developing
 

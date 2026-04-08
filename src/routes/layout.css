@@ -1,1 +1,144 @@
 @import 'tailwindcss';
+
+@plugin "@iconify/tailwind4" {
+	prefixes: material-symbols;
+}
+
+@theme {
+	--color-background: #0e0e13;
+	--color-surface: #0e0e13;
+	--color-surface-dim: #0e0e13;
+	--color-surface-bright: #2c2b33;
+	--color-surface-container-lowest: #000000;
+	--color-surface-container-low: #131318;
+	--color-surface-container: #19191f;
+	--color-surface-container-high: #1f1f26;
+	--color-surface-container-highest: #25252c;
+	--color-surface-variant: #25252c;
+	--color-surface-tint: #ca98ff;
+
+	--color-primary: #ca98ff;
+	--color-primary-dim: #9c42f4;
+	--color-primary-container: #c185ff;
+	--color-primary-fixed: #c185ff;
+	--color-primary-fixed-dim: #b772ff;
+
+	--color-secondary: #2ff801;
+	--color-secondary-dim: #2be800;
+	--color-secondary-container: #106e00;
+	--color-secondary-fixed: #2ff801;
+
+	--color-tertiary: #ff7073;
+	--color-tertiary-dim: #e90036;
+	--color-tertiary-container: #fc003b;
+	--color-tertiary-fixed: #ff9191;
+
+	--color-error: #ff6e84;
+	--color-error-dim: #d73357;
+	--color-error-container: #a70138;
+
+	--color-on-surface: #f8f5fd;
+	--color-on-surface-variant: #acaab1;
+	--color-on-background: #f8f5fd;
+	--color-on-primary: #46007d;
+	--color-on-primary-container: #350062;
+	--color-on-primary-fixed: #000000;
+	--color-on-secondary: #0b5800;
+	--color-on-secondary-container: #e7ffd9;
+	--color-on-tertiary: #49000a;
+	--color-on-tertiary-fixed: #3a0006;
+	--color-on-error: #490013;
+	--color-on-error-container: #ffb2b9;
+	--color-outline: #76747b;
+	--color-outline-variant: #48474d;
+	--color-inverse-surface: #fbf8ff;
+	--color-inverse-on-surface: #55545a;
+	--color-inverse-primary: #8523dd;
+
+	--font-headline: 'Space Grotesk', sans-serif;
+	--font-body: 'Manrope', sans-serif;
+	--font-label: 'Space Grotesk', sans-serif;
+}
+
+.glass-panel {
+	background: rgba(37, 37, 44, 0.6);
+	backdrop-filter: blur(20px);
+	-webkit-backdrop-filter: blur(20px);
+}
+
+.neon-border-purple {
+	box-shadow: 0 0 15px -5px #9c42f4;
+	border: 1px solid rgba(156, 66, 244, 0.3);
+}
+.neon-border-green {
+	box-shadow: 0 0 15px -5px #2ff801;
+	border: 1px solid rgba(47, 248, 1, 0.3);
+}
+.neon-border-red {
+	box-shadow: 0 0 15px -5px #ff7073;
+	border: 1px solid rgba(255, 112, 115, 0.3);
+}
+.neon-border-blue {
+	box-shadow: 0 0 15px -5px #c185ff;
+	border: 1px solid rgba(193, 133, 255, 0.3);
+}
+
+.glow-overlay {
+	background: radial-gradient(circle at center, rgba(156, 66, 244, 0.15) 0%, rgba(14, 14, 19, 0) 70%);
+}
+.mesh-gradient {
+	background-image:
+		radial-gradient(at 0% 0%, rgba(156, 66, 244, 0.1) 0px, transparent 50%),
+		radial-gradient(at 100% 100%, rgba(47, 248, 1, 0.05) 0px, transparent 50%);
+}
+.reveal-gradient {
+	background: linear-gradient(135deg, #9c42f4 0%, #ca98ff 100%);
+}
+
+.neon-glow-primary {
+	text-shadow: 0 0 10px rgba(202, 152, 255, 0.5), 0 0 20px rgba(202, 152, 255, 0.3);
+}
+.neon-glow-secondary {
+	text-shadow: 0 0 10px rgba(47, 248, 1, 0.5), 0 0 20px rgba(47, 248, 1, 0.3);
+}
+
+html, body {
+	overscroll-behavior: none;
+	-webkit-tap-highlight-color: transparent;
+}
+
+/* View transition cross-fade */
+::view-transition-old(root),
+::view-transition-new(root) {
+	animation-duration: 220ms;
+	animation-timing-function: ease-in-out;
+}
+::view-transition-old(root) {
+	animation-name: vt-fade-out;
+}
+::view-transition-new(root) {
+	animation-name: vt-fade-in;
+}
+
+@keyframes vt-fade-out {
+	from { opacity: 1; transform: scale(1); }
+	to   { opacity: 0; transform: scale(0.97); }
+}
+@keyframes vt-fade-in {
+	from { opacity: 0; transform: scale(1.03); }
+	to   { opacity: 1; transform: scale(1); }
+}
+
+/* Shared element: título del juego */
+::view-transition-group(game-title),
+::view-transition-group(game-icon) {
+	animation-duration: 380ms;
+	animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+::view-transition-old(game-title),
+::view-transition-new(game-title),
+::view-transition-old(game-icon),
+::view-transition-new(game-icon) {
+	animation-duration: 380ms;
+	animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
