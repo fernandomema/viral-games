@@ -171,4 +171,10 @@ registerLocale('es', {
 	'shop.owned': 'Tuyo',
 	'shop.buy': 'Comprar',
 	'shop.player': 'Jugador',
+	'shop.sounds': 'Sonidos',
+	'shop.badges': 'Títulos',
+	'shop.emotes': 'Emotes',
+	'shop.reveals': 'Revelación',
+	'shop.play': 'Probar',
+	'shop.equip': 'Equipar',
 });

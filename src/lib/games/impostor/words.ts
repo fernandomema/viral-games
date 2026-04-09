@@ -4,7 +4,7 @@
  * Supports ES and EN locales.
  */
 
-import { getLocale } from '$lib/i18n';
+
 
 export interface WordPair {
 	citizen: string;
@@ -216,15 +216,15 @@ const WORD_DATA: Record<string, WordCategory[]> = {
 	en: WORD_CATEGORIES_EN,
 };
 
-export function getWordCategories(): WordCategory[] {
-	return WORD_DATA[getLocale()] ?? WORD_CATEGORIES_ES;
+export function getWordCategories(locale: string = 'es'): WordCategory[] {
+	return WORD_DATA[locale] ?? WORD_CATEGORIES_ES;
 }
 
 /** @deprecated Use getWordCategories() for locale-aware categories */
 export const WORD_CATEGORIES = WORD_CATEGORIES_ES;
 
-export function getRandomPair(category?: string): { category: WordCategory; pair: WordPair; selectedImpostor: string } {
-	const allCats = getWordCategories();
+export function getRandomPair(category?: string, locale: string = 'es'): { category: WordCategory; pair: WordPair; selectedImpostor: string } {
+	const allCats = getWordCategories(locale);
 	const cats = category
 		? allCats.filter((c) => c.name === category)
 		: allCats;

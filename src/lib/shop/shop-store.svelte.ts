@@ -5,7 +5,7 @@
 
 import type { DiscordSDK } from '@discord/embedded-app-sdk';
 import type { UserEntitlements, UserPreferences } from './types';
-import { ITEM_BY_SKU, BACKGROUNDS, PLAYER_FRAMES, VOTE_EFFECTS } from './catalog';
+import { ITEM_BY_SKU, BACKGROUNDS, PLAYER_FRAMES, VOTE_EFFECTS, BADGES, REVEAL_EFFECTS } from './catalog';
 
 // ── Reactive state (Svelte 5 module-level) ────────────────────
 
@@ -16,6 +16,10 @@ let entitlements = $state<UserEntitlements>({
 	backgroundIds: ['bg-default'],
 	playerFrameIds: ['frame-default'],
 	voteEffectIds: ['vote-default'],
+	soundIds: [],
+	badgeIds: ['badge-default'],
+	emoteIds: [],
+	revealEffectIds: ['reveal-default'],
 });
 
 // User's active selections (persisted in localStorage)
@@ -69,6 +73,10 @@ export async function refreshEntitlements() {
 			backgroundIds: ['bg-default'],
 			playerFrameIds: ['frame-default'],
 			voteEffectIds: ['vote-default'],
+			soundIds: [],
+			badgeIds: ['badge-default'],
+			emoteIds: [],
+			revealEffectIds: ['reveal-default'],
 		};
 
 		for (const ent of res.entitlements) {
@@ -80,6 +88,14 @@ export async function refreshEntitlements() {
 				owned.playerFrameIds.push(item.id);
 			} else if (item.type === 'vote-effect' && !owned.voteEffectIds.includes(item.id)) {
 				owned.voteEffectIds.push(item.id);
+			} else if (item.type === 'sound' && !owned.soundIds.includes(item.id)) {
+				owned.soundIds.push(item.id);
+			} else if (item.type === 'badge' && !owned.badgeIds.includes(item.id)) {
+				owned.badgeIds.push(item.id);
+			} else if (item.type === 'emote' && !owned.emoteIds.includes(item.id)) {
+				owned.emoteIds.push(item.id);
+			} else if (item.type === 'reveal-effect' && !owned.revealEffectIds.includes(item.id)) {
+				owned.revealEffectIds.push(item.id);
 			}
 		}
 
@@ -106,13 +122,13 @@ export async function purchaseItem(skuId: string) {
 
 function loadPreferences(): UserPreferences {
 	if (typeof localStorage === 'undefined') {
-		return { selectedBackgroundId: null, selectedPlayerFrameId: null, selectedVoteEffectId: null };
+		return { selectedBackgroundId: null, selectedPlayerFrameId: null, selectedVoteEffectId: null, selectedBadgeId: null, selectedRevealEffectId: null };
 	}
 	try {
 		const raw = localStorage.getItem('shop-preferences');
 		if (raw) return JSON.parse(raw);
 	} catch { /* ignore */ }
-	return { selectedBackgroundId: null, selectedPlayerFrameId: null, selectedVoteEffectId: null };
+	return { selectedBackgroundId: null, selectedPlayerFrameId: null, selectedVoteEffectId: null, selectedBadgeId: null, selectedRevealEffectId: null };
 }
 
 function savePreferences() {
@@ -132,6 +148,16 @@ export function selectPlayerFrame(id: string | null) {
 
 export function selectVoteEffect(id: string | null) {
 	preferences.selectedVoteEffectId = id;
+	savePreferences();
+}
+
+export function selectBadge(id: string | null) {
+	preferences.selectedBadgeId = id;
+	savePreferences();
+}
+
+export function selectRevealEffect(id: string | null) {
+	preferences.selectedRevealEffectId = id;
 	savePreferences();
 }
 
@@ -157,11 +183,25 @@ export function getActiveVoteEffect() {
 	return VOTE_EFFECTS.find(e => e.id === id) ?? VOTE_EFFECTS[0];
 }
 
+export function getActiveBadge() {
+	const id = preferences.selectedBadgeId ?? 'badge-default';
+	return BADGES.find(b => b.id === id) ?? BADGES[0];
+}
+
+export function getActiveRevealEffect() {
+	const id = preferences.selectedRevealEffectId ?? 'reveal-default';
+	return REVEAL_EFFECTS.find(r => r.id === id) ?? REVEAL_EFFECTS[0];
+}
+
 export function ownsItem(itemId: string): boolean {
 	return (
 		entitlements.backgroundIds.includes(itemId) ||
 		entitlements.playerFrameIds.includes(itemId) ||
-		entitlements.voteEffectIds.includes(itemId)
+		entitlements.voteEffectIds.includes(itemId) ||
+		entitlements.soundIds.includes(itemId) ||
+		entitlements.badgeIds.includes(itemId) ||
+		entitlements.emoteIds.includes(itemId) ||
+		entitlements.revealEffectIds.includes(itemId)
 	);
 }
 

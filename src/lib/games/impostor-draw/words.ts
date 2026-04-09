@@ -4,7 +4,7 @@
  * Supports ES and EN locales.
  */
 
-import { getLocale } from '$lib/i18n';
+
 
 export interface WordPair {
 	citizen: string;
@@ -220,15 +220,15 @@ const DRAW_DATA: Record<string, WordCategory[]> = {
 	en: DRAW_CATEGORIES_EN,
 };
 
-export function getDrawCategories(): WordCategory[] {
-	return DRAW_DATA[getLocale()] ?? DRAW_CATEGORIES_ES;
+export function getDrawCategories(locale: string = 'es'): WordCategory[] {
+	return DRAW_DATA[locale] ?? DRAW_CATEGORIES_ES;
 }
 
 /** @deprecated Use getDrawCategories() for locale-aware categories */
 export const DRAW_CATEGORIES = DRAW_CATEGORIES_ES;
 
-export function getRandomDrawPair(category?: string): { pair: WordPair; category: string; selectedImpostor: string } {
-	const allCats = getDrawCategories();
+export function getRandomDrawPair(category?: string, locale: string = 'es'): { pair: WordPair; category: string; selectedImpostor: string } {
+	const allCats = getDrawCategories(locale);
 	let cats = allCats;
 	if (category) {
 		const found = cats.find((c) => c.name === category);

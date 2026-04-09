@@ -171,4 +171,10 @@ registerLocale('en', {
 	'shop.owned': 'Owned',
 	'shop.buy': 'Buy',
 	'shop.player': 'Player',
+	'shop.sounds': 'Sounds',
+	'shop.badges': 'Badges',
+	'shop.emotes': 'Emotes',
+	'shop.reveals': 'Reveal',
+	'shop.play': 'Play',
+	'shop.equip': 'Equip',
 });

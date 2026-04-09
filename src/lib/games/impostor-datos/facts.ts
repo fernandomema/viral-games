@@ -5,7 +5,7 @@
  * Supports ES and EN locales.
  */
 
-import { getLocale } from '$lib/i18n';
+
 
 export interface FactCategory {
 	name: string;
@@ -373,8 +373,8 @@ const FACT_DATA: Record<string, FactCategory[]> = {
 	en: FACT_CATEGORIES_EN,
 };
 
-export function getFactCategories(): FactCategory[] {
-	return FACT_DATA[getLocale()] ?? FACT_CATEGORIES_ES;
+export function getFactCategories(locale: string = 'es'): FactCategory[] {
+	return FACT_DATA[locale] ?? FACT_CATEGORIES_ES;
 }
 
 /** @deprecated Use getFactCategories() for locale-aware categories */
@@ -394,8 +394,8 @@ function shuffleArray<T>(arr: T[]): T[] {
  * @param citizenCount number of citizens that need a unique real fact
  * @param category optional category filter
  */
-export function getFactsForRound(citizenCount: number, category?: string): { realFacts: string[]; fakeFact: string } {
-	let cats = getFactCategories();
+export function getFactsForRound(citizenCount: number, category?: string, locale: string = 'es'): { realFacts: string[]; fakeFact: string } {
+	let cats = getFactCategories(locale);
 	if (category) {
 		const filtered = cats.filter((c) => c.name === category);
 		if (filtered.length > 0) cats = filtered;

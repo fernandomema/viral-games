@@ -7,16 +7,16 @@
 	import { haptic, hapticTap } from '$lib/haptics';
 	import ShopModal from '$lib/shop/ShopModal.svelte';
 	import { initShop, getActiveBackground, getActivePlayerFrame, getActiveVoteEffect } from '$lib/shop';
-	import { t, detectLocale } from '$lib/i18n';
+	import { t, detectLocale, getLocale } from '$lib/i18n';
 
 	let { data } = $props();
 	let game: GameDef = $derived(data.game);
 
 	// Categories based on game type
 	let categories = $derived(
-		game.type === 'word' ? getWordCategories() :
-		game.type === 'draw' ? getDrawCategories() :
-		getFactCategories()
+		game.type === 'word' ? getWordCategories(getLocale()) :
+		game.type === 'draw' ? getDrawCategories(getLocale()) :
+		getFactCategories(getLocale())
 	);
 
 	// ── State ─────────────────────────────────────────────────────
@@ -32,6 +32,8 @@
 	let configImpostors = $state(1);
 	let impostorNames = $state<string[]>([]);
 	let impostorWon = $state(false);
+	let myAvatarHash = $state<string | null>(null);
+	let speakingUsers = $state(new Set<string>());
 
 	// Config: word + fact use timerSeconds, draw uses timerPerTurn + rounds
 	let configTimer = $state(300);
@@ -80,7 +82,7 @@
 				response_type: 'code',
 				state: '',
 				prompt: 'none',
-				scope: ['identify'],
+				scope: ['identify', 'rpc.voice.read'],
 			});
 
 			const tokenRes = await fetch('/.proxy/api/token', {
@@ -97,6 +99,24 @@
 
 			myDiscordUserId = auth.user.id;
 			myUserName = auth.user.global_name || auth.user.username;
+			myAvatarHash = auth.user.avatar ?? null;
+
+			// Subscribe to voice speaking events
+			const channelId = discordSdk.channelId;
+			if (channelId) {
+				try {
+					await discordSdk.subscribe('SPEAKING_START', (data: any) => {
+						speakingUsers = new Set([...speakingUsers, data.user_id]);
+					}, { channel_id: channelId });
+					await discordSdk.subscribe('SPEAKING_STOP', (data: any) => {
+						const next = new Set(speakingUsers);
+						next.delete(data.user_id);
+						speakingUsers = next;
+					}, { channel_id: channelId });
+				} catch {
+					// Voice events may not be available
+				}
+			}
 
 			// Init shop with Discord SDK for IAP
 			initShop(discordSdk);
@@ -122,6 +142,7 @@
 				roomId,
 				discordUserId: myDiscordUserId,
 				userName: myUserName,
+				avatar: myAvatarHash,
 				gameId: game.id,
 			}));
 		};
@@ -216,6 +237,16 @@
 		return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 	}
 
+	function avatarUrl(discordUserId: string | null, avatarHash: string | null, size = 64): string | null {
+		if (!discordUserId || !avatarHash) return null;
+		return `https://cdn.discordapp.com/avatars/${discordUserId}/${avatarHash}.webp?size=${size}`;
+	}
+
+	function isSpeaking(discordUserId: string | null): boolean {
+		if (!discordUserId) return false;
+		return speakingUsers.has(discordUserId);
+	}
+
 	$effect(() => { init(); });
 
 	$effect(() => {
@@ -281,8 +312,14 @@
 			<div class="bg-surface-container rounded-xl p-3 min-h-0 overflow-y-auto shrink">
 				<div class="flex flex-wrap gap-1.5">
 					{#each gameState.players as player}
-						<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high/50 text-sm">
-							<span class="iconify material-symbols--person text-primary text-sm"></span>
+						{@const avatarSrc = avatarUrl(player.discordUserId, player.avatar)}
+						{@const speaking = isSpeaking(player.discordUserId)}
+						<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high/50 text-sm transition-all {speaking ? 'ring-2 ring-green-400 ring-offset-1 ring-offset-surface-container' : ''}">
+							{#if avatarSrc}
+								<img src={avatarSrc} alt="" class="w-5 h-5 rounded-full object-cover" />
+							{:else}
+								<span class="iconify material-symbols--person text-primary text-sm"></span>
+							{/if}
 							<span class="text-on-surface font-medium">{player.name}</span>
 						</span>
 					{/each}
@@ -461,18 +498,25 @@
 				{#each alivePlayers as player}
 					{@const isMe = myRole?.playerId === player.id}
 					{@const isSelected = votingTarget === player.id}
+					{@const avatarSrc = avatarUrl(player.discordUserId, player.avatar)}
+					{@const speaking = isSpeaking(player.discordUserId)}
 					{#if !isMe}
 						<button
 							onclick={() => { if (!myVoteSubmitted) castVote(player.id); }}
 							disabled={myVoteSubmitted}
 							class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all
+								{speaking ? 'ring-2 ring-green-400' : ''}
 								{isSelected
 									? 'bg-primary text-on-primary ring-2 ring-primary/50'
 									: myVoteSubmitted
 										? 'bg-surface-container text-on-surface-variant/50 cursor-not-allowed'
 										: 'bg-surface-container text-on-surface hover:bg-surface-container-high active:scale-[0.98]'}"
 						>
-							<span class="iconify {isSelected ? 'material-symbols--check-circle' : 'material-symbols--person'} text-lg"></span>
+							{#if avatarSrc}
+								<img src={avatarSrc} alt="" class="w-6 h-6 rounded-full object-cover" />
+							{:else}
+								<span class="iconify {isSelected ? 'material-symbols--check-circle' : 'material-symbols--person'} text-lg"></span>
+							{/if}
 							<span class="font-medium text-sm">{player.name}</span>
 							{#if isSelected && activeVoteEffect.emoji}
 								<span class="ml-auto text-base">{activeVoteEffect.emoji}</span>

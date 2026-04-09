@@ -146,7 +146,7 @@ wss.on('connection', (ws: WebSocket) => {
 function handleMessage(ws: WebSocket, client: ClientState, msg: any) {
 	switch (msg.type) {
 		case 'join': {
-			const { roomId, discordUserId, userName, gameId } = msg;
+			const { roomId, discordUserId, userName, gameId, avatar } = msg;
 			if (!roomId || !discordUserId || !userName || !gameId) {
 				throw new Error('Faltan campos: roomId, discordUserId, userName, gameId');
 			}
@@ -156,7 +156,7 @@ function handleMessage(ws: WebSocket, client: ClientState, msg: any) {
 			client.roomId = roomId;
 
 			const room = getOrCreateRoom(roomId, discordUserId, gameId);
-			joinRoom(room, discordUserId, userName, ws);
+			joinRoom(room, discordUserId, userName, avatar ?? null, ws);
 			broadcastState(room);
 			break;
 		}

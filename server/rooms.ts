@@ -23,6 +23,7 @@ function createEngine(gameId: GameId): GameEngine {
 export interface RoomPlayer {
 	discordUserId: string;
 	userName: string;
+	avatar: string | null;
 	enginePlayerId: string;
 	ws: WebSocket;
 }
@@ -64,11 +65,12 @@ export function deleteRoom(roomId: string) {
 	rooms.delete(roomId);
 }
 
-export function joinRoom(room: Room, discordUserId: string, userName: string, ws: WebSocket): RoomPlayer {
+export function joinRoom(room: Room, discordUserId: string, userName: string, avatar: string | null, ws: WebSocket): RoomPlayer {
 	// Check if already in room (reconnect)
 	const existing = room.players.find(p => p.discordUserId === discordUserId);
 	if (existing) {
 		existing.ws = ws;
+		if (avatar) existing.avatar = avatar;
 		return existing;
 	}
 
@@ -82,6 +84,7 @@ export function joinRoom(room: Room, discordUserId: string, userName: string, ws
 	const rp: RoomPlayer = {
 		discordUserId,
 		userName,
+		avatar,
 		enginePlayerId: enginePlayer.id,
 		ws,
 	};
@@ -126,8 +129,19 @@ export function getPlayerView(room: Room, discordUserId: string) {
 	}
 
 	// Strip roles from state to prevent cheating (only send own role)
+	// Augment players with Discord avatar info
+	const playersWithAvatars = state.players.map((p: any) => {
+		const rp2 = room.players.find(r => r.enginePlayerId === p.id);
+		return {
+			...p,
+			discordUserId: rp2?.discordUserId ?? null,
+			avatar: rp2?.avatar ?? null,
+		};
+	});
+
 	const sanitized = {
 		...state,
+		players: playersWithAvatars,
 		roles: [], // never leak roles to clients
 	};
 

@@ -5,7 +5,7 @@
  *   https://discord.com/developers/applications/<APP_ID>/skus
  */
 
-import type { ShopBackground, ShopPlayerFrame, ShopVoteEffect } from './types';
+import type { ShopBackground, ShopPlayerFrame, ShopVoteEffect, ShopSound, ShopBadge, ShopEmote, ShopRevealEffect } from './types';
 
 // ── Backgrounds ───────────────────────────────────────────────
 
@@ -152,6 +152,209 @@ export const VOTE_EFFECTS: ShopVoteEffect[] = [
 	},
 ];
 
+// ── Sounds ────────────────────────────────────────────────────
+
+export const SOUNDS: ShopSound[] = [
+	{
+		id: 'sound-laugh',
+		skuId: 'SKU_SOUND_LAUGH',
+		name: 'Risa',
+		description: '¡Una carcajada para momentos divertidos!',
+		emoji: '😂',
+		src: '/audio/laugh.mp3',
+	},
+	{
+		id: 'sound-suspense',
+		skuId: 'SKU_SOUND_SUSPENSE',
+		name: 'Suspenso',
+		description: 'Tensión dramática al máximo.',
+		emoji: '😰',
+		src: '/audio/suspense.mp3',
+	},
+	{
+		id: 'sound-airhorn',
+		skuId: 'SKU_SOUND_AIRHORN',
+		name: 'Bocina',
+		description: 'El clásico airhorn para celebrar.',
+		emoji: '📯',
+		src: '/audio/airhorn.mp3',
+	},
+	{
+		id: 'sound-bruh',
+		skuId: 'SKU_SOUND_BRUH',
+		name: 'Bruh',
+		description: 'Para momentos de incredulidad.',
+		emoji: '😐',
+		src: '/audio/bruh.mp3',
+	},
+	{
+		id: 'sound-clap',
+		skuId: 'SKU_SOUND_CLAP',
+		name: 'Aplausos',
+		description: 'Un aplauso por buen juego.',
+		emoji: '👏',
+		src: '/audio/clap.mp3',
+	},
+	{
+		id: 'sound-sad',
+		skuId: 'SKU_SOUND_SAD',
+		name: 'Triste',
+		description: 'Violín triste para la derrota.',
+		emoji: '🎻',
+		src: '/audio/sad.mp3',
+	},
+];
+
+// ── Badges ────────────────────────────────────────────────────
+
+export const BADGES: ShopBadge[] = [
+	{
+		id: 'badge-default',
+		skuId: '',
+		name: 'Sin Título',
+		description: 'Sin título visible.',
+		label: '',
+		color: '',
+	},
+	{
+		id: 'badge-detective',
+		skuId: 'SKU_BADGE_DETECTIVE',
+		name: 'Detective Pro',
+		description: 'Siempre descubres al impostor.',
+		label: 'Detective Pro',
+		color: '#60a5fa',
+		icon: 'material-symbols--detective',
+	},
+	{
+		id: 'badge-liar',
+		skuId: 'SKU_BADGE_LIAR',
+		name: 'Mentiroso Nato',
+		description: 'Nadie descubre tus mentiras.',
+		label: 'Mentiroso Nato',
+		color: '#f87171',
+		icon: 'material-symbols--theater-comedy',
+	},
+	{
+		id: 'badge-vip',
+		skuId: 'SKU_BADGE_VIP',
+		name: 'VIP',
+		description: 'Estatus exclusivo de jugador premium.',
+		label: 'VIP',
+		color: '#fbbf24',
+		icon: 'material-symbols--star',
+	},
+	{
+		id: 'badge-ghost',
+		skuId: 'SKU_BADGE_GHOST',
+		name: 'Fantasma',
+		description: 'Sigiloso como un fantasma.',
+		label: 'Fantasma',
+		color: '#a78bfa',
+		icon: 'material-symbols--ghost',
+	},
+	{
+		id: 'badge-crown',
+		skuId: 'SKU_BADGE_CROWN',
+		name: 'Rey del Juego',
+		description: 'La corona del mejor jugador.',
+		label: 'Rey del Juego',
+		color: '#f59e0b',
+		icon: 'material-symbols--crown',
+	},
+];
+
+// ── Emotes ────────────────────────────────────────────────────
+
+export const EMOTES: ShopEmote[] = [
+	{
+		id: 'emote-sus',
+		skuId: 'SKU_EMOTE_SUS',
+		name: 'Sospechoso',
+		description: 'Hmm... muy sospechoso.',
+		emoji: '🤨',
+	},
+	{
+		id: 'emote-think',
+		skuId: 'SKU_EMOTE_THINK',
+		name: 'Pensando',
+		description: 'Déjame pensarlo...',
+		emoji: '🤔',
+	},
+	{
+		id: 'emote-skull',
+		skuId: 'SKU_EMOTE_SKULL',
+		name: 'Muerto',
+		description: 'Me muero de la risa.',
+		emoji: '💀',
+	},
+	{
+		id: 'emote-fire',
+		skuId: 'SKU_EMOTE_FIRE',
+		name: 'Fuego',
+		description: '¡Qué jugada tan buena!',
+		emoji: '🔥',
+	},
+	{
+		id: 'emote-cap',
+		skuId: 'SKU_EMOTE_CAP',
+		name: 'Mentira',
+		description: '¡Eso es mentira!',
+		emoji: '🧢',
+	},
+	{
+		id: 'emote-clown',
+		skuId: 'SKU_EMOTE_CLOWN',
+		name: 'Payaso',
+		description: '¿De verdad hiciste eso?',
+		emoji: '🤡',
+	},
+];
+
+// ── Reveal Effects ────────────────────────────────────────────
+
+export const REVEAL_EFFECTS: ShopRevealEffect[] = [
+	{
+		id: 'reveal-default',
+		skuId: '',
+		name: 'Estándar',
+		description: 'Revelación sin efecto especial.',
+		emoji: '',
+		animation: '',
+	},
+	{
+		id: 'reveal-confetti',
+		skuId: 'SKU_REVEAL_CONFETTI',
+		name: 'Confeti',
+		description: 'Lluvia de confeti al revelar.',
+		emoji: '🎉',
+		animation: 'confetti',
+	},
+	{
+		id: 'reveal-explosion',
+		skuId: 'SKU_REVEAL_EXPLOSION',
+		name: 'Explosión',
+		description: 'Explosión dramática de revelación.',
+		emoji: '💥',
+		animation: 'explosion',
+	},
+	{
+		id: 'reveal-spotlight',
+		skuId: 'SKU_REVEAL_SPOTLIGHT',
+		name: 'Spotlight',
+		description: 'Un foco de luz sobre el impostor.',
+		emoji: '🔦',
+		animation: 'spotlight',
+	},
+	{
+		id: 'reveal-glitch',
+		skuId: 'SKU_REVEAL_GLITCH',
+		name: 'Glitch',
+		description: 'Distorsión digital al revelar.',
+		emoji: '📺',
+		animation: 'glitch',
+	},
+];
+
 // ── Helpers ───────────────────────────────────────────────────
 
 /** All purchasable backgrounds (excluding the default free one) */ 
@@ -163,11 +366,27 @@ export const PURCHASABLE_FRAMES = PLAYER_FRAMES.filter(f => f.skuId !== '');
 /** All purchasable vote effects (excluding default) */
 export const PURCHASABLE_EFFECTS = VOTE_EFFECTS.filter(e => e.skuId !== '');
 
+/** All sounds (all are purchasable) */
+export const PURCHASABLE_SOUNDS = SOUNDS.filter(s => s.skuId !== '');
+
+/** All purchasable badges (excluding default) */
+export const PURCHASABLE_BADGES = BADGES.filter(b => b.skuId !== '');
+
+/** All emotes (all are purchasable) */
+export const PURCHASABLE_EMOTES = EMOTES.filter(e => e.skuId !== '');
+
+/** All purchasable reveal effects (excluding default) */
+export const PURCHASABLE_REVEAL_EFFECTS = REVEAL_EFFECTS.filter(r => r.skuId !== '');
+
 /** Map item ID to SKU ID */
 export const ITEM_BY_ID = new Map<string, { type: string; skuId: string }>([
 	...BACKGROUNDS.filter(b => b.skuId).map(b => [b.id, { type: 'background', skuId: b.skuId }] as const),
 	...PLAYER_FRAMES.filter(f => f.skuId).map(f => [f.id, { type: 'player-frame', skuId: f.skuId }] as const),
 	...VOTE_EFFECTS.filter(e => e.skuId).map(e => [e.id, { type: 'vote-effect', skuId: e.skuId }] as const),
+	...SOUNDS.filter(s => s.skuId).map(s => [s.id, { type: 'sound', skuId: s.skuId }] as const),
+	...BADGES.filter(b => b.skuId).map(b => [b.id, { type: 'badge', skuId: b.skuId }] as const),
+	...EMOTES.filter(e => e.skuId).map(e => [e.id, { type: 'emote', skuId: e.skuId }] as const),
+	...REVEAL_EFFECTS.filter(r => r.skuId).map(r => [r.id, { type: 'reveal-effect', skuId: r.skuId }] as const),
 ]);
 
 /** Map SKU ID to item */
@@ -175,4 +394,8 @@ export const ITEM_BY_SKU = new Map<string, { id: string; type: string }>([
 	...BACKGROUNDS.filter(b => b.skuId).map(b => [b.skuId, { id: b.id, type: 'background' }] as const),
 	...PLAYER_FRAMES.filter(f => f.skuId).map(f => [f.skuId, { id: f.id, type: 'player-frame' }] as const),
 	...VOTE_EFFECTS.filter(e => e.skuId).map(e => [e.skuId, { id: e.id, type: 'vote-effect' }] as const),
+	...SOUNDS.filter(s => s.skuId).map(s => [s.skuId, { id: s.id, type: 'sound' }] as const),
+	...BADGES.filter(b => b.skuId).map(b => [b.skuId, { id: b.id, type: 'badge' }] as const),
+	...EMOTES.filter(e => e.skuId).map(e => [e.skuId, { id: e.id, type: 'emote' }] as const),
+	...REVEAL_EFFECTS.filter(r => r.skuId).map(r => [r.skuId, { id: r.id, type: 'reveal-effect' }] as const),
 ]);

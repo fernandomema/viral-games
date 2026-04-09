@@ -11,7 +11,7 @@
 	import { beforeNavigate } from '$app/navigation';
 	import { setActiveGame } from '$lib/active-game';
 	import { haptic, hapticTap } from '$lib/haptics';
-	import { t } from '$lib/i18n';
+	import { t, getLocale } from '$lib/i18n';
 
 	let { data } = $props();
 	let game: GameDef = $derived(data.game);
@@ -37,9 +37,9 @@
 
 	// ── Categories ────────────────────────────────────────────────
 	let categories: { name: string; icon: string }[] = $derived(
-		game.type === 'word' ? getWordCategories() :
-		game.type === 'draw' ? getDrawCategories() :
-		getFactCategories()
+		game.type === 'word' ? getWordCategories(getLocale()) :
+		game.type === 'draw' ? getDrawCategories(getLocale()) :
+		getFactCategories(getLocale())
 	);
 
 	// ── Reactive state ────────────────────────────────────────────
