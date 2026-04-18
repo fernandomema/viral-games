@@ -1,4 +1,4 @@
-export type GameType = 'word' | 'draw' | 'fact';
+export type GameType = 'word' | 'draw' | 'fact' | 'basta';
 
 export interface GameDef {
 	id: string;
@@ -116,6 +116,34 @@ export const GAMES: GameDef[] = [
 		revealHiddenText: 'Pulsa para ver tu dato',
 		votingTitle: '¿QUIÉN TIENE EL DATO FALSO?',
 		votingSubtitle: 'Selecciona al jugador que crees que miente',
+	},
+	{
+		id: 'basta',
+		type: 'basta',
+		num: '04',
+		cardTitleHtml:
+			'<span style="background:linear-gradient(90deg,#f59e0b,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">¡BASTA!</span>',
+		description: 'Piensa rápido. Escribe palabras con la letra elegida.',
+		icon: 'material-symbols--edit-note',
+		borderClass: 'neon-border-amber',
+		badgeClass: 'bg-amber-600 text-white',
+		iconColorClass: 'text-amber-500',
+		barStyle: 'background: linear-gradient(90deg, #f59e0b, #fbbf24)',
+		hoverGlow: 'rgba(245,158,11,0.2)',
+		headerIcon: 'material-symbols--edit-note',
+		headerTitle: '¡BASTA!',
+		heroIcon: 'material-symbols--edit-note',
+		heroSubtitle: '¡Piensa Rápido!',
+		heroTitleHtml:
+			'<span class="text-transparent bg-clip-text bg-linear-to-r from-amber-500 to-amber-300">¡BASTA!</span>',
+		heroDescription:
+			'Rellena las categorías con palabras que empiecen por la letra elegida. ¡El más rápido gana!',
+		playerLabel: 'Jugador',
+		inputPlaceholder: 'Nombre del jugador...',
+		citizenLabel: 'Jugador',
+		revealHiddenText: '',
+		votingTitle: '¿ES VÁLIDA LA RESPUESTA?',
+		votingSubtitle: 'Vota si las respuestas son correctas',
 	},
 ];
 

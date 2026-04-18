@@ -15,6 +15,7 @@ import {
 	leaveRoom,
 	broadcastState,
 	startTimer,
+	listWebRooms,
 } from './rooms.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -66,6 +67,11 @@ app.post('/api/token', async (req, res) => {
 // ── Health check ──────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {
 	res.json({ ok: true });
+});
+
+// ── Web rooms listing ─────────────────────────────────────────
+app.get('/api/web/rooms', (_req, res) => {
+	res.json({ rooms: listWebRooms() });
 });
 
 // ── Entitlements (server-side verification) ───────────────────
@@ -146,7 +152,7 @@ wss.on('connection', (ws: WebSocket) => {
 function handleMessage(ws: WebSocket, client: ClientState, msg: any) {
 	switch (msg.type) {
 		case 'join': {
-			const { roomId, discordUserId, userName, gameId, avatar } = msg;
+			const { roomId, discordUserId, userName, gameId, avatar, isPublic } = msg;
 			if (!roomId || !discordUserId || !userName || !gameId) {
 				throw new Error('Faltan campos: roomId, discordUserId, userName, gameId');
 			}
@@ -155,7 +161,7 @@ function handleMessage(ws: WebSocket, client: ClientState, msg: any) {
 			client.userName = userName;
 			client.roomId = roomId;
 
-			const room = getOrCreateRoom(roomId, discordUserId, gameId);
+			const room = getOrCreateRoom(roomId, discordUserId, gameId, !!isPublic);
 			joinRoom(room, discordUserId, userName, avatar ?? null, ws);
 			broadcastState(room);
 			break;
@@ -176,7 +182,11 @@ function handleMessage(ws: WebSocket, client: ClientState, msg: any) {
 			if (!room || room.hostDiscordUserId !== client.discordUserId) {
 				throw new Error('Solo el host puede iniciar la partida');
 			}
-			room.engine.startGame(msg.category);
+			if (room.gameId === 'basta') {
+				room.engine.startGame();
+			} else {
+				(room.engine as any).startGame(msg.category);
+			}
 			// In Discord mode, skip reveal phase — startTimer sets the right phase
 			startTimer(room);
 			broadcastState(room);
@@ -186,21 +196,89 @@ function handleMessage(ws: WebSocket, client: ClientState, msg: any) {
 		case 'vote': {
 			const room = getRoom(client.roomId!);
 			if (!room) throw new Error('Room no encontrada');
+			if (room.gameId === 'basta') throw new Error('Usa bastaVote para basta');
 
 			const rp = room.players.find(p => p.discordUserId === client.discordUserId);
 			if (!rp) throw new Error('No estás en la room');
 
-			room.engine.vote(rp.enginePlayerId, msg.targetId);
+			(room.engine as any).vote(rp.enginePlayerId, msg.targetId);
 			broadcastState(room);
 
 			// Auto-finish if all non-eliminated players have voted
 			const state = room.engine.getState();
-			const alive = state.players.filter(p => !p.eliminated);
-			const voteCount = Object.keys(state.votes).length;
+			const alive = state.players.filter((p: any) => !p.eliminated);
+			const voteCount = Object.keys((state as any).votes).length;
 			if (voteCount >= alive.length) {
-				room.engine.finishVoting();
+				(room.engine as any).finishVoting();
 				broadcastState(room);
 			}
+			break;
+		}
+
+		// ── Basta-specific messages ───────────────────────────────
+		case 'bastaSubmitAnswers': {
+			const room = getRoom(client.roomId!);
+			if (!room || room.gameId !== 'basta') throw new Error('No es un juego de basta');
+
+			const rp = room.players.find(p => p.discordUserId === client.discordUserId);
+			if (!rp) throw new Error('No estás en la room');
+
+			const bastaEngine = room.engine as import('../src/lib/games/basta/engine.js').BastaEngine;
+			bastaEngine.submitAnswers(rp.enginePlayerId, msg.answers);
+			broadcastState(room);
+			break;
+		}
+
+		case 'bastaStop': {
+			const room = getRoom(client.roomId!);
+			if (!room || room.gameId !== 'basta') throw new Error('No es un juego de basta');
+
+			const rp = room.players.find(p => p.discordUserId === client.discordUserId);
+			if (!rp) throw new Error('No estás en la room');
+
+			const bastaEngine2 = room.engine as import('../src/lib/games/basta/engine.js').BastaEngine;
+			bastaEngine2.stopRound(rp.enginePlayerId);
+			if (room.timerInterval) {
+				clearInterval(room.timerInterval);
+				room.timerInterval = null;
+			}
+			broadcastState(room);
+			break;
+		}
+
+		case 'bastaVote': {
+			const room = getRoom(client.roomId!);
+			if (!room || room.gameId !== 'basta') throw new Error('No es un juego de basta');
+
+			const rp = room.players.find(p => p.discordUserId === client.discordUserId);
+			if (!rp) throw new Error('No estás en la room');
+
+			const bastaEngine3 = room.engine as import('../src/lib/games/basta/engine.js').BastaEngine;
+			bastaEngine3.submitVote(rp.enginePlayerId, msg.targetPlayerId, msg.category, msg.valid);
+			broadcastState(room);
+
+			// Auto-finish voting when all votes are in
+			if (bastaEngine3.allVotesIn()) {
+				bastaEngine3.finishVoting();
+				broadcastState(room);
+			}
+			break;
+		}
+
+		case 'bastaNextRound': {
+			const room = getRoom(client.roomId!);
+			if (!room || room.gameId !== 'basta') throw new Error('No es un juego de basta');
+			if (room.hostDiscordUserId !== client.discordUserId) {
+				throw new Error('Solo el host puede avanzar de ronda');
+			}
+
+			const bastaEngine4 = room.engine as import('../src/lib/games/basta/engine.js').BastaEngine;
+			bastaEngine4.nextRound();
+			const newState = bastaEngine4.getState();
+			if (newState.phase === 'playing') {
+				startTimer(room);
+			}
+			broadcastState(room);
 			break;
 		}
 

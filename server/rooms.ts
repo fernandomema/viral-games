@@ -1,21 +1,23 @@
 /**
  * Room management — wraps game engines for multiplayer Discord Activities.
- * Supports multiple game types (impostor, impostor-draw, impostor-datos).
+ * Supports multiple game types (impostor, impostor-draw, impostor-datos, basta).
  */
 
 import { createImpostorGame, type ImpostorEngine } from '../src/lib/games/impostor/engine.js';
 import { createImpostorDrawGame, type ImpostorDrawEngine } from '../src/lib/games/impostor-draw/engine.js';
 import { createImpostorDatosGame, type ImpostorDatosEngine } from '../src/lib/games/impostor-datos/engine.js';
+import { createBastaGame, type BastaEngine } from '../src/lib/games/basta/engine.js';
 import type { WebSocket } from 'ws';
 
-export type GameId = 'impostor' | 'impostor-draw' | 'impostor-datos';
-export type GameEngine = ImpostorEngine | ImpostorDrawEngine | ImpostorDatosEngine;
+export type GameId = 'impostor' | 'impostor-draw' | 'impostor-datos' | 'basta';
+export type GameEngine = ImpostorEngine | ImpostorDrawEngine | ImpostorDatosEngine | BastaEngine;
 
 function createEngine(gameId: GameId): GameEngine {
 	switch (gameId) {
 		case 'impostor': return createImpostorGame();
 		case 'impostor-draw': return createImpostorDrawGame();
 		case 'impostor-datos': return createImpostorDatosGame();
+		case 'basta': return createBastaGame();
 		default: throw new Error(`Juego desconocido: ${gameId}`);
 	}
 }
@@ -35,11 +37,12 @@ export interface Room {
 	players: RoomPlayer[];
 	hostDiscordUserId: string;
 	timerInterval: ReturnType<typeof setInterval> | null;
+	isPublic: boolean;
 }
 
 const rooms = new Map<string, Room>();
 
-export function getOrCreateRoom(roomId: string, hostDiscordUserId: string, gameId: GameId): Room {
+export function getOrCreateRoom(roomId: string, hostDiscordUserId: string, gameId: GameId, isPublic: boolean = false): Room {
 	let room = rooms.get(roomId);
 	if (!room) {
 		room = {
@@ -49,6 +52,7 @@ export function getOrCreateRoom(roomId: string, hostDiscordUserId: string, gameI
 			players: [],
 			hostDiscordUserId,
 			timerInterval: null,
+			isPublic,
 		};
 		rooms.set(roomId, room);
 	}
@@ -120,15 +124,6 @@ export function getPlayerView(room: Room, discordUserId: string) {
 	const state = room.engine.getState();
 	const rp = room.players.find(p => p.discordUserId === discordUserId);
 
-	const activePhases = ['reveal', 'playing', 'drawing', 'voting', 'results'];
-	let myRole: any = null;
-	if (rp && activePhases.includes(state.phase)) {
-		try {
-			myRole = room.engine.revealRole(rp.enginePlayerId);
-		} catch { /* player not found — race condition */ }
-	}
-
-	// Strip roles from state to prevent cheating (only send own role)
 	// Augment players with Discord avatar info
 	const playersWithAvatars = state.players.map((p: any) => {
 		const rp2 = room.players.find(r => r.enginePlayerId === p.id);
@@ -138,6 +133,40 @@ export function getPlayerView(room: Room, discordUserId: string) {
 			avatar: rp2?.avatar ?? null,
 		};
 	});
+
+	// Basta game — no roles, different state shape
+	if (room.gameId === 'basta') {
+		const bastaEngine = room.engine as BastaEngine;
+		const bastaState = bastaEngine.getState();
+
+		let winners: string[] | undefined;
+		if (bastaState.phase === 'results') {
+			winners = bastaEngine.getWinners().map(p => p.name);
+		}
+
+		return {
+			type: 'state' as const,
+			state: {
+				...bastaState,
+				players: playersWithAvatars,
+			},
+			myRole: rp ? { playerId: rp.enginePlayerId } : null,
+			hostDiscordUserId: room.hostDiscordUserId,
+			roomId: room.id,
+			gameId: room.gameId,
+			winners,
+		};
+	}
+
+	// Impostor games — role-based
+	const activePhases = ['reveal', 'playing', 'drawing', 'voting', 'results'];
+	let myRole: any = null;
+	if (rp && activePhases.includes(state.phase)) {
+		try {
+			(room.engine as ImpostorEngine).revealRole;
+			myRole = (room.engine as any).revealRole(rp.enginePlayerId);
+		} catch { /* player not found — race condition */ }
+	}
 
 	const sanitized = {
 		...state,
@@ -149,9 +178,8 @@ export function getPlayerView(room: Room, discordUserId: string) {
 	let impostorNames: string[] | undefined;
 	let impostorWon: boolean | undefined;
 	if (state.phase === 'results') {
-		const results = room.engine.getResults();
+		const results = (room.engine as any).getResults();
 		impostorNames = results.impostors.map((p: any) => p.name);
-		// Impostor wins if the eliminated player was NOT an impostor
 		const eliminatedPlayer = state.players.find((p: any) => p.eliminated);
 		const impostorIds = state.roles.filter((r: any) => r.role === 'impostor').map((r: any) => r.playerId);
 		impostorWon = eliminatedPlayer ? !impostorIds.includes(eliminatedPlayer.id) : true;
@@ -179,11 +207,45 @@ export function broadcastState(room: Room) {
 	}
 }
 
+/** List public web rooms that are joinable (lobby phase, web-* prefix) */
+export function listWebRooms(): { code: string; gameId: GameId; playerCount: number; hostName: string; players: string[] }[] {
+	const result: { code: string; gameId: GameId; playerCount: number; hostName: string; players: string[] }[] = [];
+	for (const [id, room] of rooms) {
+		if (!id.startsWith('web-')) continue;
+		if (!room.isPublic) continue;
+		const state = room.engine.getState();
+		if (state.phase !== 'lobby') continue;
+		// Extract code from "web-basta-XXXX" format
+		const parts = id.split('-');
+		const code = parts[parts.length - 1];
+		const host = room.players.find(p => p.discordUserId === room.hostDiscordUserId);
+		result.push({
+			code,
+			gameId: room.gameId,
+			playerCount: room.players.length,
+			hostName: host?.userName ?? '?',
+			players: room.players.map(p => p.userName),
+		});
+	}
+	return result;
+}
+
 /** Start the timer server-side (adapts to game type) */
 export function startTimer(room: Room) {
 	if (room.timerInterval) clearInterval(room.timerInterval);
 
-	if (room.gameId === 'impostor-draw') {
+	if (room.gameId === 'basta') {
+		// Basta: playing timer, can be stopped by any player
+		const bastaEngine = room.engine as BastaEngine;
+		room.timerInterval = setInterval(() => {
+			const remaining = bastaEngine.tick();
+			broadcastState(room);
+			if (remaining <= 0 && room.timerInterval) {
+				clearInterval(room.timerInterval);
+				room.timerInterval = null;
+			}
+		}, 1000);
+	} else if (room.gameId === 'impostor-draw') {
 		// Draw mode: turn-based drawing with per-turn timer
 		const drawEngine = room.engine as ImpostorDrawEngine;
 		drawEngine.setPhase('drawing');

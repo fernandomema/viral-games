@@ -7,6 +7,9 @@
 	import { createImpostorDatosGame, getFactCategories } from '$lib/games/impostor-datos';
 	import type { ImpostorDatosEngine } from '$lib/games/impostor-datos';
 	import DrawingCanvas from '$lib/components/DrawingCanvas.svelte';
+	import GameHero from '$lib/components/GameHero.svelte';
+	import GameConfig from '$lib/components/GameConfig.svelte';
+	import CategoryPicker from '$lib/components/CategoryPicker.svelte';
 	import { loadPlayers, savePlayers } from '$lib/players-store';
 	import { beforeNavigate } from '$app/navigation';
 	import { setActiveGame } from '$lib/active-game';
@@ -326,20 +329,16 @@
 			<!-- Left column: Hero + Players -->
 			<div>
 				<!-- Hero -->
-				<div class="flex flex-col items-center lg:items-start text-center lg:text-left mb-10 mesh-gradient relative">
-					<div class="absolute inset-0 glow-overlay pointer-events-none"></div>
-					<div class="relative mb-8">
-						<div class="absolute -inset-8 bg-primary-dim/20 blur-3xl rounded-full"></div>
-						<div bind:this={heroIconEl} class="relative w-32 h-32 rounded-full border-2 border-outline-variant/20 flex items-center justify-center bg-surface-container-low shadow-2xl" style="view-transition-name: game-icon">
-							<span class="iconify {game.heroIcon} text-6xl text-primary-dim drop-shadow-[0_0_15px_rgba(156,66,244,0.5)]"></span>
-						</div>
-					</div>
-					<p class="{isGreen ? 'text-secondary' : 'text-primary-dim'} font-headline uppercase tracking-[0.4em] text-xs font-bold">{t(`game.${game.id}.heroSubtitle`)}</p>
-					<h1 bind:this={heroTitleEl} class="text-4xl lg:text-5xl font-headline font-extrabold tracking-tighter mt-2" style="view-transition-name: game-title">
-						{@html game.heroTitleHtml}
-					</h1>
-					<p class="text-on-surface-variant max-w-xs text-sm font-light leading-relaxed mt-3">{t(`game.${game.id}.heroDescription`)}</p>
-				</div>
+				<GameHero {game} {isGreen} bind:iconEl={heroIconEl} bind:titleEl={heroTitleEl}>
+					<!-- Online play button -->
+					<a
+						href="/online/{game.id}"
+						class="mt-5 inline-flex items-center gap-2 px-5 py-2 rounded-full {isGreen ? 'bg-secondary/15 text-secondary border border-secondary/30 hover:bg-secondary/25' : 'bg-primary/15 text-primary border border-primary/30 hover:bg-primary/25'} text-sm font-bold font-headline transition-colors"
+					>
+						<span class="iconify material-symbols--wifi text-base"></span>
+						{t('web.playOnline')}
+					</a>
+				</GameHero>
 
 				<!-- Player Config -->
 				<div class="mb-6">
@@ -414,135 +413,9 @@
 
 			<!-- Right column / sidebar: Config + Start -->
 			<div class="lg:sticky lg:top-24">
-				<!-- Settings Panel -->
-				<div class="glass-panel rounded-2xl p-6 border border-outline-variant/10 mb-6">
-					<div class="flex items-center gap-2 mb-5">
-						<span class="iconify material-symbols--tune {isGreen ? 'text-primary' : 'text-primary-dim'} text-xl"></span>
-						<h3 class="font-headline text-lg font-bold tracking-tight">{t('game.config')}</h3>
-					</div>
+				<GameConfig {game} {isGreen} bind:configImpostors bind:configTimer bind:configHint bind:configRounds bind:configTurnTimer {maxImpostors} playerCount={gameState.players.length} />
 
-					<!-- Impostor count (all games) -->
-					<div class="mb-5">
-						<div class="flex items-center justify-between mb-2">
-							<label class="text-sm font-bold text-on-surface-variant font-headline uppercase tracking-wider">{t('game.impostors')}</label>
-							<span class="{isGreen ? 'text-primary' : 'text-primary-dim'} font-headline font-bold text-lg">{configImpostors}</span>
-						</div>
-						<div class="flex items-center gap-3">
-							<button onclick={() => { const prev = configImpostors; configImpostors = Math.max(1, configImpostors - 1); configImpostors === prev ? haptic('error') : hapticTap(); }}
-								class="w-10 h-10 rounded-lg bg-surface-container-high border border-outline-variant/20 flex items-center justify-center active:scale-90 transition-all hover:bg-surface-container-highest">
-								<span class="iconify material-symbols--remove text-on-surface-variant"></span>
-							</button>
-							<div class="grow h-2 bg-surface-container-highest rounded-full overflow-hidden">
-								<div class="h-full bg-linear-to-r from-primary-dim to-primary rounded-full transition-all"
-									style="width: {(configImpostors / Math.max(maxImpostors, 1)) * 100}%"></div>
-							</div>
-							<button onclick={() => { const prev = configImpostors; configImpostors = Math.min(maxImpostors, configImpostors + 1); configImpostors === prev ? haptic('error') : hapticTap(); }}
-								class="w-10 h-10 rounded-lg bg-surface-container-high border border-outline-variant/20 flex items-center justify-center active:scale-90 transition-all hover:bg-surface-container-highest">
-								<span class="iconify material-symbols--add text-on-surface-variant"></span>
-							</button>
-						</div>
-						<p class="text-[10px] text-on-surface-variant mt-1">{t('game.maxImpostors', { max: maxImpostors, count: gameState.players.length || 0 })}</p>
-					</div>
-
-					<!-- Timer (word + fact only) -->
-					{#if game.type === 'word' || game.type === 'fact'}
-						<div class="mb-5">
-							<div class="flex items-center justify-between mb-2">
-								<label class="text-sm font-bold text-on-surface-variant font-headline uppercase tracking-wider">{t('game.timer')}</label>
-								<span class="{isGreen ? 'text-primary' : 'text-primary-dim'} font-headline font-bold">{formatTime(configTimer)}</span>
-							</div>
-							<div class="flex flex-wrap gap-2">
-								{#each [120, 180, 300, 420, 600] as t}
-									<button onclick={() => { configTimer = t; hapticTap(); }}
-										class="px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all active:scale-95
-											{configTimer === t ? 'bg-primary text-on-primary-fixed' : 'bg-surface-container-high text-on-surface-variant border border-outline-variant/20'}">
-										{formatTime(t)}
-									</button>
-								{/each}
-							</div>
-						</div>
-					{/if}
-
-					<!-- Rounds (draw only) -->
-					{#if game.type === 'draw'}
-						<div class="mb-5">
-							<div class="flex items-center justify-between mb-2">
-								<label class="text-sm font-bold text-on-surface-variant font-headline uppercase tracking-wider">{t('game.rounds')}</label>
-								<span class="text-primary-dim font-headline font-bold">{configRounds}</span>
-							</div>
-							<div class="flex flex-wrap gap-2">
-								{#each [1,2,3,4] as r}
-									<button onclick={() => { configRounds = r; hapticTap(); }}
-										class="px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all active:scale-95
-											{configRounds === r ? 'bg-primary text-on-primary-fixed' : 'bg-surface-container-high text-on-surface-variant border border-outline-variant/20'}">
-										{r}
-									</button>
-								{/each}
-							</div>
-						</div>
-
-						<!-- Timer per turn -->
-						<div class="mb-5">
-							<div class="flex items-center justify-between mb-2">
-								<label class="text-sm font-bold text-on-surface-variant font-headline uppercase tracking-wider">{t('game.secsPerTurn')}</label>
-								<span class="text-primary-dim font-headline font-bold">{configTurnTimer}s</span>
-							</div>
-							<div class="flex flex-wrap gap-2">
-								{#each [10, 15, 20, 30] as t}
-									<button onclick={() => { configTurnTimer = t; hapticTap(); }}
-										class="px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all active:scale-95
-											{configTurnTimer === t ? 'bg-primary text-on-primary-fixed' : 'bg-surface-container-high text-on-surface-variant border border-outline-variant/20'}">
-										{t}s
-									</button>
-								{/each}
-							</div>
-						</div>
-					{/if}
-
-					<!-- Hint toggle (word + draw only) -->
-					{#if game.type === 'word' || game.type === 'draw'}
-						<div class="flex items-center justify-between p-3 rounded-xl bg-surface-container-high border border-outline-variant/10">
-							<div class="flex items-center gap-3">
-								<span class="iconify material-symbols--lightbulb {isGreen ? 'text-primary' : 'text-primary-dim'} text-xl"></span>
-								<div>
-									<p class="text-sm font-bold text-on-surface">{t('game.impostorHint')}</p>
-									<p class="text-[10px] text-on-surface-variant">{game.type === 'word' ? t('game.impostorHintDesc') : t('game.impostorHintShort')}</p>
-								</div>
-							</div>
-							<button onclick={() => { configHint = !configHint; hapticTap(); }}
-								class="w-12 h-7 rounded-full transition-all relative {configHint ? 'bg-primary' : 'bg-surface-container-highest border border-outline-variant/30'}">
-								<div class="w-5 h-5 rounded-full bg-white shadow-md absolute top-1 transition-all {configHint ? 'left-6' : 'left-1'}"></div>
-							</button>
-						</div>
-					{/if}
-				</div>
-
-				<!-- Category selection -->
-				<div class="glass-panel rounded-2xl p-6 border border-outline-variant/10 mb-6">
-					<div class="flex items-center gap-2 mb-4">
-						<span class="iconify material-symbols--category {isGreen ? 'text-secondary' : 'text-primary-dim'} text-xl"></span>
-						<h3 class="font-headline text-lg font-bold tracking-tight">{t('game.category')}</h3>
-					</div>
-					<div class="flex flex-wrap gap-2">
-						<button
-							onclick={() => { selectedCategory = undefined; hapticTap(); }}
-							class="px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all active:scale-95
-								{selectedCategory === undefined ? 'bg-primary text-on-primary-fixed' : 'bg-surface-container-high text-on-surface-variant border border-outline-variant/20'}"
-						>
-							{t('game.random')}
-						</button>
-						{#each categories as cat}
-							<button
-								onclick={() => { selectedCategory = cat.name; hapticTap(); }}
-								class="px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all active:scale-95 flex items-center gap-1
-									{selectedCategory === cat.name ? 'bg-primary text-on-primary-fixed' : 'bg-surface-container-high text-on-surface-variant border border-outline-variant/20'}"
-							>
-								<span class="iconify {cat.icon} text-sm"></span>
-								{cat.name}
-							</button>
-						{/each}
-					</div>
-				</div>
+				<CategoryPicker {categories} bind:selectedCategory {isGreen} />
 
 				<!-- Start Button -->
 				<button
