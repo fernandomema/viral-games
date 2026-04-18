@@ -230,4 +230,23 @@ registerLocale('es', {
 	'basta.timer': 'Tiempo',
 	'basta.rounds': 'Rondas',
 	'basta.minPlayers': 'Mínimo 2 jugadores',
+
+	// ── Palabra Oculta ───────────────────────────────────────────
+	'game.palabra-oculta.description': 'Adivina la palabra oculta con pistas alfabéticas.',
+	'game.palabra-oculta.heroSubtitle': '¿Podrás adivinarla?',
+	'game.palabra-oculta.heroDescription': 'Adivina la palabra secreta. Cada intento te dice qué tan cerca estás alfabéticamente.',
+	'game.palabra-oculta.playerLabel': 'Jugador',
+	'game.palabra-oculta.inputPlaceholder': 'Escribe una palabra...',
+	'guess.pickCategory': 'Elige una categoría para empezar',
+	'guess.typeGuess': 'Escribe tu intento',
+	'guess.guess': 'ADIVINAR',
+	'guess.attempts': '{count} intentos',
+	'guess.distance': 'Distancia',
+	'guess.youWon': '¡Acertaste!',
+	'guess.theWordWas': 'La palabra era',
+	'guess.close': '¡Muy cerca!',
+	'guess.medium': 'Te acercas...',
+	'guess.far': 'Lejos',
+	'guess.playAgain': 'Jugar de nuevo',
+	'guess.newGame': 'Nueva partida',
 });

@@ -6,6 +6,10 @@
 	import type { ImpostorDrawEngine, Stroke } from '$lib/games/impostor-draw';
 	import { createImpostorDatosGame, getFactCategories } from '$lib/games/impostor-datos';
 	import type { ImpostorDatosEngine } from '$lib/games/impostor-datos';
+	import { createPalabraOcultaGame } from '$lib/games/palabra-oculta';
+	import type { PalabraOcultaEngine } from '$lib/games/palabra-oculta/engine';
+	import type { PalabraOcultaState } from '$lib/games/palabra-oculta/types';
+	import { getCategories as getGuessCategories } from '$lib/games/palabra-oculta/words';
 	import DrawingCanvas from '$lib/components/DrawingCanvas.svelte';
 	import GameHero from '$lib/components/GameHero.svelte';
 	import GameConfig from '$lib/components/GameConfig.svelte';
@@ -22,31 +26,40 @@
 	// ── Engine setup ──────────────────────────────────────────────
 	type AnyEngine = ImpostorEngine | ImpostorDrawEngine | ImpostorDatosEngine;
 
-	function buildEngine(): AnyEngine {
+	// Guess engine (separate — single-player)
+	let isGuessGame = $derived(game.type === 'guess');
+	// eslint-disable-next-line -- intentionally capturing initial game type for engine creation
+	const guessEngine: PalabraOcultaEngine | null = (() => data.game.type === 'guess' ? createPalabraOcultaGame() : null)();
+	let guessState = $state<PalabraOcultaState | null>(guessEngine ? guessEngine.getState() : null);
+	let guessInput = $state('');
+
+	function buildEngine(): AnyEngine | null {
 		switch (game.type) {
 			case 'word': return createImpostorGame();
 			case 'draw': return createImpostorDrawGame();
 			case 'fact': return createImpostorDatosGame();
+			default: return null;
 		}
 	}
 
 	const engine = buildEngine();
 
-	// Load saved players
-	{
+	// Load saved players (only for multiplayer games)
+	if (engine) {
 		const saved = loadPlayers();
 		for (const p of saved) engine.addPlayer(p.name);
 	}
 
 	// ── Categories ────────────────────────────────────────────────
 	let categories: { name: string; icon: string }[] = $derived(
+		game.type === 'guess' ? getGuessCategories(getLocale()).map(c => ({ name: c, icon: '' })) :
 		game.type === 'word' ? getWordCategories(getLocale()) :
 		game.type === 'draw' ? getDrawCategories(getLocale()) :
 		getFactCategories(getLocale())
 	);
 
 	// ── Reactive state ────────────────────────────────────────────
-	let gameState = $state(engine.getState());
+	let gameState = $state(engine ? engine.getState() : { phase: 'lobby', players: [], currentRevealIndex: 0, roles: [] } as any);
 	let playerName = $state('');
 	let revealedRole: any = $state(null);
 	let isRevealed = $state(false);
@@ -71,11 +84,13 @@
 	const STROKE_COLORS = ['#CA98FF', '#2FF801', '#FF7073', '#60A5FA', '#FBBF24', '#F472B6', '#34D399', '#FB923C'];
 
 	function sync() {
-		gameState = engine.getState();
+		if (engine) gameState = engine.getState();
+		if (guessEngine) guessState = guessEngine.getState();
 	}
 
 	// ── Config apply ──────────────────────────────────────────────
 	function applyConfig() {
+		if (!engine) return;
 		if (game.type === 'word') {
 			(engine as ImpostorEngine).setConfig({
 				impostorCount: configImpostors,
@@ -98,10 +113,47 @@
 		sync();
 	}
 
+	// ── Guess game functions ──────────────────────────────────────
+	function startGuessGame() {
+		guessEngine!.startGame(getLocale(), selectedCategory);
+		guessState = guessEngine!.getState();
+		haptic('success');
+	}
+
+	function submitGuess() {
+		const word = guessInput.trim();
+		if (!word || !guessEngine) return;
+		guessEngine.guess(word);
+		guessInput = '';
+		guessState = guessEngine.getState();
+		if (guessState!.won) haptic('success');
+		else hapticTap();
+	}
+
+	function resetGuessGame() {
+		guessEngine!.reset();
+		guessState = guessEngine!.getState();
+		selectedCategory = undefined;
+	}
+
+	function getDistanceLabel(distance: number): string {
+		if (distance === 0) return t('guess.youWon');
+		if (distance <= 100) return t('guess.close');
+		if (distance <= 700) return t('guess.medium');
+		return t('guess.far');
+	}
+
+	function getDistanceColor(distance: number): string {
+		if (distance === 0) return 'text-green-400';
+		if (distance <= 100) return 'text-cyan-400';
+		if (distance <= 700) return 'text-amber-400';
+		return 'text-red-400';
+	}
+
 	// ── Shared functions ──────────────────────────────────────────
 	function addPlayer() {
 		const name = playerName.trim();
-		if (!name) return;
+		if (!name || !engine) return;
 		engine.addPlayer(name);
 		playerName = '';
 		sync();
@@ -110,6 +162,7 @@
 	}
 
 	function removePlayer(id: string) {
+		if (!engine) return;
 		engine.removePlayer(id);
 		sync();
 		savePlayers(gameState.players);
@@ -117,6 +170,7 @@
 	}
 
 	function startGame() {
+		if (!engine) return;
 		applyConfig();
 		engine.startGame(selectedCategory);
 		revealedRole = null;
@@ -128,7 +182,7 @@
 	function revealCurrentRole() {
 		const player = gameState.players[gameState.currentRevealIndex];
 		if (player) {
-			revealedRole = engine.revealRole(player.id);
+			revealedRole = engine!.revealRole(player.id);
 			isRevealed = true;
 			haptic('nudge');
 		}
@@ -141,10 +195,10 @@
 
 	function nextPlayer() {
 		hideRole();
-		engine.nextReveal();
+		engine!.nextReveal();
 		sync();
 		// Draw: if we just entered drawing phase, start the turn timer
-		if (game.type === 'draw' && engine.getState().phase === 'drawing') {
+		if (game.type === 'draw' && engine!.getState().phase === 'drawing') {
 			startTurnTimer();
 		}
 	}
@@ -173,7 +227,7 @@
 	function goToVoting() {
 		if (timerInterval) clearInterval(timerInterval);
 		timerInterval = null;
-		engine.setPhase('voting');
+		engine!.setPhase('voting');
 		sync();
 		haptic('nudge');
 	}
@@ -229,9 +283,9 @@
 
 	function confirmVotes() {
 		for (const p of gameState.players.filter(p => !p.eliminated)) {
-			if (votingTarget) engine.vote(p.id, votingTarget);
+			if (votingTarget) engine!.vote(p.id, votingTarget);
 		}
-		engine.finishVoting();
+		engine!.finishVoting();
 		sync();
 		haptic('success');
 	}
@@ -241,7 +295,7 @@
 		revealedRole = null;
 		isRevealed = false;
 		hasDrawnStroke = false;
-		engine.reset();
+		engine!.reset();
 		sync();
 	}
 
@@ -252,7 +306,7 @@
 		revealedRole = null;
 		isRevealed = false;
 		hasDrawnStroke = false;
-		engine.reset();
+		engine!.reset();
 		sync();
 	}
 
@@ -278,7 +332,7 @@
 	const alivePlayers = $derived(gameState.players.filter(p => !p.eliminated));
 
 	const results = $derived(
-		gameState.phase === 'results' ? engine.getResults() : null
+		gameState.phase === 'results' ? engine!.getResults() : null
 	);
 
 	const currentDrawer = $derived(
@@ -314,8 +368,8 @@
 		<span class="iconify {game.headerIcon} text-primary-dim text-xl"></span>
 		<span class="text-lg font-bold tracking-tighter {isGreen ? 'text-primary' : 'text-primary-dim'} font-headline">{game.headerTitle}</span>
 	</div>
-	{#if gameState.phase !== 'lobby'}
-		<button onclick={backToLobby} aria-label={t('game.exit')} class="p-2 rounded-full hover:bg-surface-variant/60 transition-all active:scale-95">
+	{#if gameState.phase !== 'lobby' && !(isGuessGame && guessState?.phase === 'lobby')}
+		<button onclick={() => isGuessGame ? resetGuessGame() : backToLobby()} aria-label={t('game.exit')} class="p-2 rounded-full hover:bg-surface-variant/60 transition-all active:scale-95">
 			<span class="iconify material-symbols--close text-outline-variant"></span>
 		</button>
 	{/if}
@@ -324,7 +378,7 @@
 <main class="pt-20 pb-32 px-6 w-full min-h-dvh max-w-6xl mx-auto">
 
 	<!-- ═══════════════ LOBBY PHASE ═══════════════ -->
-	{#if gameState.phase === 'lobby'}
+	{#if !isGuessGame && gameState.phase === 'lobby'}
 		<div class="lg:grid lg:grid-cols-[1fr_380px] lg:gap-12 lg:items-start">
 			<!-- Left column: Hero + Players -->
 			<div>
@@ -939,5 +993,143 @@
 				</a>
 			</div>
 		</div>
+	{/if}
+
+	<!-- ═══════════════ GUESS GAME (Palabra Oculta) ═══════════════ -->
+	{#if isGuessGame && guessState}
+		{#if guessState.phase === 'lobby'}
+			<div class="max-w-lg mx-auto">
+				<GameHero {game} isGreen={false} bind:iconEl={heroIconEl} bind:titleEl={heroTitleEl} />
+
+				<p class="text-on-surface-variant text-center mb-6">{t('guess.pickCategory')}</p>
+
+				<!-- Category grid -->
+				<div class="grid grid-cols-2 gap-3 mb-8">
+					{#each categories as cat}
+						<button
+							onclick={() => { selectedCategory = selectedCategory === cat.name ? undefined : cat.name; }}
+							class="p-4 rounded-xl border-2 text-center font-bold font-headline transition-all active:scale-95 {selectedCategory === cat.name ? 'border-cyan-500 bg-cyan-500/15 text-cyan-400' : 'border-outline-variant/20 bg-surface-container-high text-on-surface hover:border-outline-variant/40'}"
+						>
+							{cat.name}
+						</button>
+					{/each}
+				</div>
+
+				<button
+					onclick={startGuessGame}
+					class="w-full py-5 rounded-xl bg-linear-to-r from-cyan-600 to-cyan-400 text-white font-headline font-bold text-xl uppercase tracking-widest shadow-[0_0_30px_rgba(6,182,212,0.3)] hover:shadow-[0_0_45px_rgba(6,182,212,0.5)] active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+				>
+					{t('game.start')}
+					<span class="iconify material-symbols--play-arrow"></span>
+				</button>
+			</div>
+
+		{:else if guessState.phase === 'playing'}
+			<div class="max-w-lg mx-auto">
+				<!-- Category badge -->
+				<div class="text-center mb-6">
+					<span class="inline-flex items-center gap-2 bg-cyan-500/10 px-4 py-1.5 rounded-full border border-cyan-500/20">
+						<span class="font-headline text-cyan-400 text-xs font-bold tracking-widest uppercase">{guessState.category}</span>
+					</span>
+					<p class="text-on-surface-variant text-sm mt-2">{t('guess.attempts', { count: guessState.attempts })}</p>
+				</div>
+
+				<!-- Alphabet range -->
+				<div class="flex flex-wrap justify-center gap-1 mb-6">
+					{#each 'abcdefghijklmnopqrstuvwxyz'.split('') as letter}
+						{@const active = letter >= guessState.activeRange[0] && letter <= guessState.activeRange[1]}
+						<span class="w-7 h-7 flex items-center justify-center rounded text-xs font-bold font-mono uppercase transition-all {active ? 'bg-cyan-500/20 text-cyan-400' : 'bg-surface-container-high/30 text-outline-variant/30'}">{letter}</span>
+					{/each}
+				</div>
+
+				<!-- Guess input -->
+				<form onsubmit={(e) => { e.preventDefault(); submitGuess(); }} class="glass-panel p-1 rounded-xl mb-8 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+					<div class="flex items-center gap-2 bg-surface-container-lowest rounded-lg p-2">
+						<div class="grow flex items-center px-3">
+							<span class="iconify material-symbols--search text-outline mr-3"></span>
+							<input
+								bind:value={guessInput}
+								class="bg-transparent border-none focus:outline-none text-on-surface w-full font-medium placeholder:text-outline/50"
+								placeholder={t('guess.typeGuess')}
+								type="text"
+								maxlength="30"
+							/>
+						</div>
+						<button
+							type="submit"
+							disabled={!guessInput.trim()}
+							class="bg-linear-to-r from-cyan-600 to-cyan-400 text-white px-6 py-3 rounded-lg font-bold transition-transform active:scale-95 flex items-center gap-2 shadow-[0_0_15px_rgba(6,182,212,0.3)] disabled:opacity-40"
+						>
+							{t('guess.guess')}
+						</button>
+					</div>
+				</form>
+
+				<!-- Guesses list -->
+				{#if guessState.guesses.length > 0}
+					<div class="space-y-2">
+						{#each guessState.guesses as g, i}
+							<div class="bg-surface-container-high p-4 rounded-xl flex items-center justify-between border border-outline-variant/10 {g.distance === 0 ? 'ring-2 ring-green-400/50 bg-green-500/10' : ''}">
+								<div class="flex items-center gap-3">
+									{#if g.direction === 'down'}
+										<span class="text-cyan-400 text-lg">↓</span>
+									{:else if g.direction === 'up'}
+										<span class="text-amber-400 text-lg">↑</span>
+									{:else}
+										<span class="text-green-400 text-lg">✓</span>
+									{/if}
+									<span class="font-bold text-on-surface">{g.word}</span>
+								</div>
+								<div class="flex items-center gap-3">
+									<span class="text-xs {getDistanceColor(g.distance)} font-bold">{getDistanceLabel(g.distance)}</span>
+									<span class="font-mono text-sm {getDistanceColor(g.distance)} font-bold min-w-[3ch] text-right">{g.distance}</span>
+								</div>
+							</div>
+						{/each}
+					</div>
+				{/if}
+			</div>
+
+		{:else if guessState.phase === 'results'}
+			<div class="flex flex-col items-center justify-center min-h-[70dvh] text-center max-w-lg mx-auto">
+				<div class="absolute top-1/4 left-1/2 -translate-x-1/2 w-64 h-64 bg-cyan-500/10 blur-[100px] rounded-full pointer-events-none"></div>
+
+				<div class="mb-6">
+					<span class="inline-flex items-center gap-2 bg-green-500/10 px-4 py-1.5 rounded-full border border-green-500/20 mb-4">
+						<span class="iconify material-symbols--check-circle text-green-400"></span>
+						<span class="font-headline text-green-400 text-xs font-bold tracking-widest uppercase">{t('guess.youWon')}</span>
+					</span>
+				</div>
+
+				<h2 class="font-headline text-5xl font-bold tracking-tight text-cyan-400 mb-2">{guessState.targetWord.toUpperCase()}</h2>
+				<p class="text-on-surface-variant text-sm mb-2">{t('guess.theWordWas')}</p>
+				<p class="text-on-surface-variant text-sm mb-8">{t('guess.attempts', { count: guessState.attempts })}</p>
+
+				<!-- Guesses recap -->
+				<div class="w-full space-y-2 mb-8">
+					{#each guessState.guesses as g}
+						<div class="bg-surface-container-high p-3 rounded-xl flex items-center justify-between border border-outline-variant/10 {g.distance === 0 ? 'ring-2 ring-green-400/50 bg-green-500/10' : ''}">
+							<span class="font-bold text-on-surface">{g.word}</span>
+							<span class="font-mono text-sm {getDistanceColor(g.distance)} font-bold">{g.distance}</span>
+						</div>
+					{/each}
+				</div>
+
+				<div class="flex gap-3 w-full">
+					<button
+						onclick={resetGuessGame}
+						class="flex-1 py-4 rounded-xl bg-linear-to-r from-cyan-600 to-cyan-400 text-white font-headline font-bold uppercase tracking-widest active:scale-95 transition-all"
+					>
+						{t('guess.playAgain')}
+					</button>
+					<a
+						href="/"
+						class="py-4 px-6 rounded-xl bg-surface-container-high text-on-surface font-headline font-bold uppercase tracking-widest active:scale-95 transition-all border border-outline-variant/20 text-center"
+					>
+						{t('game.exit')}
+					</a>
+				</div>
+			</div>
+		{/if}
 	{/if}
 </main>

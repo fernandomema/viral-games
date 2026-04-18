@@ -1,4 +1,4 @@
-export type GameType = 'word' | 'draw' | 'fact' | 'basta';
+export type GameType = 'word' | 'draw' | 'fact' | 'basta' | 'guess';
 
 export interface GameDef {
 	id: string;
@@ -144,6 +144,34 @@ export const GAMES: GameDef[] = [
 		revealHiddenText: '',
 		votingTitle: '¿ES VÁLIDA LA RESPUESTA?',
 		votingSubtitle: 'Vota si las respuestas son correctas',
+	},
+	{
+		id: 'palabra-oculta',
+		type: 'guess',
+		num: '05',
+		cardTitleHtml:
+			'PALABRA <span style="background:linear-gradient(90deg,#06b6d4,#67e8f9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">OCULTA</span>',
+		description: 'Adivina la palabra oculta con pistas alfabéticas.',
+		icon: 'material-symbols--search',
+		borderClass: 'neon-border-cyan',
+		badgeClass: 'bg-cyan-600 text-white',
+		iconColorClass: 'text-cyan-500',
+		barStyle: 'background: linear-gradient(90deg, #06b6d4, #67e8f9)',
+		hoverGlow: 'rgba(6,182,212,0.2)',
+		headerIcon: 'material-symbols--search',
+		headerTitle: 'PALABRA OCULTA',
+		heroIcon: 'material-symbols--search',
+		heroSubtitle: '¿Podrás adivinarla?',
+		heroTitleHtml:
+			'PALABRA <span class="text-transparent bg-clip-text bg-linear-to-r from-cyan-500 to-cyan-300">OCULTA</span>',
+		heroDescription:
+			'Adivina la palabra secreta. Cada intento te dice qué tan cerca estás alfabéticamente.',
+		playerLabel: 'Jugador',
+		inputPlaceholder: 'Escribe una palabra...',
+		citizenLabel: '',
+		revealHiddenText: '',
+		votingTitle: '',
+		votingSubtitle: '',
 	},
 ];
 

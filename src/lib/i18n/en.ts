@@ -230,4 +230,23 @@ registerLocale('en', {
 	'basta.timer': 'Timer',
 	'basta.rounds': 'Rounds',
 	'basta.minPlayers': 'Minimum 2 players',
+
+	// ── Palabra Oculta ───────────────────────────────────────────
+	'game.palabra-oculta.description': 'Guess the hidden word with alphabetical clues.',
+	'game.palabra-oculta.heroSubtitle': 'Can you guess it?',
+	'game.palabra-oculta.heroDescription': 'Guess the secret word. Each attempt tells you how close you are alphabetically.',
+	'game.palabra-oculta.playerLabel': 'Player',
+	'game.palabra-oculta.inputPlaceholder': 'Type a word...',
+	'guess.pickCategory': 'Pick a category to start',
+	'guess.typeGuess': 'Type your guess',
+	'guess.guess': 'GUESS',
+	'guess.attempts': '{count} attempts',
+	'guess.distance': 'Distance',
+	'guess.youWon': 'You got it!',
+	'guess.theWordWas': 'The word was',
+	'guess.close': 'Very close!',
+	'guess.medium': 'Getting warmer...',
+	'guess.far': 'Far away',
+	'guess.playAgain': 'Play again',
+	'guess.newGame': 'New game',
 });
