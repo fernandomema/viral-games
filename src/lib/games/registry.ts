@@ -1,8 +1,16 @@
-export type GameType = 'word' | 'draw' | 'fact' | 'basta' | 'guess';
+export type GameType = 'word' | 'draw' | 'fact' | 'basta' | 'guess' | 'external';
 
 export interface GameDef {
 	id: string;
 	type: GameType;
+	/** Available in Discord Activities */
+	discordEnabled: boolean;
+	/** Has online multiplayer (web) */
+	onlineEnabled: boolean;
+	/** Has local play */
+	localEnabled: boolean;
+	/** External URL — game hosted elsewhere */
+	externalUrl?: string;
 	// Home card
 	num: string;
 	cardTitleHtml: string;
@@ -36,6 +44,9 @@ export const GAMES: GameDef[] = [
 	{
 		id: 'impostor',
 		type: 'word',
+		discordEnabled: true,
+		onlineEnabled: true,
+		localEnabled: true,
 		num: '01',
 		cardTitleHtml:
 			'EL <span style="background:linear-gradient(90deg,#9c42f4,#ca98ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">IMPOSTOR</span>',
@@ -64,6 +75,9 @@ export const GAMES: GameDef[] = [
 	{
 		id: 'impostor-draw',
 		type: 'draw',
+		discordEnabled: true,
+		onlineEnabled: true,
+		localEnabled: true,
 		num: '02',
 		cardTitleHtml:
 			'IMPOSTOR <span style="background:linear-gradient(90deg,#2be800,#2ff801);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">DIBUJO</span>',
@@ -92,6 +106,9 @@ export const GAMES: GameDef[] = [
 	{
 		id: 'impostor-datos',
 		type: 'fact',
+		discordEnabled: true,
+		onlineEnabled: true,
+		localEnabled: true,
 		num: '03',
 		cardTitleHtml:
 			'IMPOSTOR <span style="background:linear-gradient(90deg,#2be800,#2ff801);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">DATOS</span>',
@@ -120,6 +137,9 @@ export const GAMES: GameDef[] = [
 	{
 		id: 'basta',
 		type: 'basta',
+		discordEnabled: false,
+		onlineEnabled: true,
+		localEnabled: false,
 		num: '04',
 		cardTitleHtml:
 			'<span style="background:linear-gradient(90deg,#f59e0b,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">¡BASTA!</span>',
@@ -148,6 +168,9 @@ export const GAMES: GameDef[] = [
 	{
 		id: 'palabra-oculta',
 		type: 'guess',
+		discordEnabled: false,
+		onlineEnabled: false,
+		localEnabled: true,
 		num: '05',
 		cardTitleHtml:
 			'PALABRA <span style="background:linear-gradient(90deg,#06b6d4,#67e8f9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">OCULTA</span>',
@@ -173,8 +196,42 @@ export const GAMES: GameDef[] = [
 		votingTitle: '',
 		votingSubtitle: '',
 	},
+	{
+		id: 'tragos-locos',
+		type: 'external',
+		discordEnabled: false,
+		onlineEnabled: false,
+		localEnabled: true,
+		externalUrl: 'https://tragos-locos.servitimo.net/intro',
+		num: '06',
+		cardTitleHtml:
+			'<span style="background:linear-gradient(90deg,#f97316,#fb923c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">TRAGOS LOCOS</span>',
+		description: 'El mejor juego de bebidas para fiestas. Retos, preguntas y diversión.',
+		icon: 'material-symbols--local-bar',
+		borderClass: 'neon-border-orange',
+		badgeClass: 'bg-orange-600 text-white',
+		iconColorClass: 'text-orange-500',
+		barStyle: 'background: linear-gradient(90deg, #f97316, #fb923c)',
+		hoverGlow: 'rgba(249,115,22,0.2)',
+		headerIcon: 'material-symbols--local-bar',
+		headerTitle: 'TRAGOS LOCOS',
+		heroIcon: 'material-symbols--local-bar',
+		heroSubtitle: '¡A beber!',
+		heroTitleHtml:
+			'<span class="text-transparent bg-clip-text bg-linear-to-r from-orange-500 to-orange-300">TRAGOS LOCOS</span>',
+		heroDescription:
+			'Juego de bebidas con tarjetas de retos, preguntas atrevidas y modos para todo tipo de fiestas.',
+		playerLabel: 'Jugador',
+		inputPlaceholder: '',
+		citizenLabel: '',
+		revealHiddenText: '',
+		votingTitle: '',
+		votingSubtitle: '',
+	},
 ];
 
 export const GAMES_BY_ID = Object.fromEntries(
 	GAMES.map((g) => [g.id, g])
 ) as Record<string, GameDef>;
+
+export const DISCORD_GAMES = GAMES.filter(g => g.discordEnabled);

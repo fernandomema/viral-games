@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { DiscordSDK } from '@discord/embedded-app-sdk';
+	import GameSwitcher from '$lib/components/GameSwitcher.svelte';
 	import type { GameDef } from '$lib/games/registry';
 	import { getWordCategories } from '$lib/games/impostor';
 	import { getDrawCategories } from '$lib/games/impostor-draw';
@@ -300,7 +301,8 @@
 					</h1>
 					<p class="text-on-surface-variant text-xs">{t('discord.playersCount', { count: gameState.players.length })}</p>
 				</div>
-				<div class="flex-1 flex justify-end">
+				<div class="flex-1 flex justify-end gap-2">
+					<GameSwitcher currentGame={game} buildHref={(g) => `/discord/${g.id}${new URL(window.location.href).search}`} />
 					<button onclick={() => { shopOpen = true; hapticTap(); }}
 						class="w-8 h-8 rounded-full bg-surface-container-high/60 flex items-center justify-center text-primary hover:bg-surface-container-highest transition-colors">
 						<span class="iconify material-symbols--storefront text-lg"></span>

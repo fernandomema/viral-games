@@ -12,7 +12,6 @@
 	$effect(() => {
 		const id = getActiveGame();
 		if (id) {
-			// Clear any residual names first (avoid duplicate view-transition-name)
 			titleEls.forEach(el => { if (el) el.style.viewTransitionName = ''; });
 			iconEls.forEach(el => { if (el) el.style.viewTransitionName = ''; });
 			const i = GAMES.findIndex(g => g.id === id);
@@ -26,7 +25,6 @@
 
 	function navigateTo(e: MouseEvent, href: string, index: number) {
 		e.preventDefault();
-		// Clear previous names before assigning to avoid duplicates
 		titleEls.forEach(el => { if (el) el.style.viewTransitionName = ''; });
 		iconEls.forEach(el => { if (el) el.style.viewTransitionName = ''; });
 		if (titleEls[index]) titleEls[index].style.viewTransitionName = 'game-title';
@@ -40,11 +38,23 @@
 		const next = SUPPORTED_LOCALES[(i + 1) % SUPPORTED_LOCALES.length];
 		setLocale(next);
 	}
+
+	function getOnlineHref(game: typeof GAMES[0]): string | null {
+		if (!game.onlineEnabled) return null;
+		if (game.id === 'basta') return '/basta';
+		return `/online/${game.id}`;
+	}
+
+	function getLocalHref(game: typeof GAMES[0]): string | null {
+		if (!game.localEnabled) return null;
+		if (game.externalUrl) return game.externalUrl;
+		return `/${game.id}`;
+	}
 </script>
 
 <div class="min-h-screen bg-background">
 
-	<!-- ═══ Fondo (fixed para no interferir con sticky) ═══ -->
+	<!-- ═══ Fondo ═══ -->
 	<div class="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true" style="view-transition-name: bg-orbs">
 		<div class="absolute inset-0 grid-bg"></div>
 		<div class="orb-a absolute -top-48 -left-48 w-150 h-150 rounded-full bg-primary-dim opacity-[0.22] blur-[160px]"></div>
@@ -52,7 +62,7 @@
 		<div class="orb-c absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 w-150 h-150 rounded-full bg-primary opacity-[0.07] blur-[180px]"></div>
 	</div>
 
-	<!-- ═══ Top App Bar (sticky, frosted) ═══ -->
+	<!-- ═══ Top App Bar ═══ -->
 	<div class="sticky top-0 z-30" style="background: rgba(14,14,19,0.82); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px)">
 		<header class="flex items-center justify-between px-5 h-14 border-b border-white/8">
 			<div class="flex items-center gap-2">
@@ -76,22 +86,25 @@
 		</header>
 	</div>
 
-	<!-- ═══ Hero sticky transparente ═══ -->
-	<div class="sticky top-14 z-20 px-5 py-4 text-center">
-		<h1 class="font-headline font-black leading-none tracking-tighter text-on-surface text-4xl lg:text-5xl neon-glow-primary">
+	<!-- ═══ Hero ═══ -->
+	<div class="relative z-10 px-5 pt-10 pb-6 text-center">
+		<div class="inline-flex items-center gap-2 bg-primary/10 px-4 py-1.5 rounded-full border border-primary/20 mb-4">
+			<span class="iconify material-symbols--sports-esports text-primary text-sm"></span>
+			<span class="font-label text-primary text-[10px] tracking-widest uppercase font-bold">{t('home.meta')}</span>
+		</div>
+		<h1 class="font-headline font-black leading-none tracking-tighter text-on-surface text-5xl lg:text-6xl neon-glow-primary mb-3">
 			{@html t('home.chooseMode').replace(t('home.mode'), `<span class="text-primary">${t('home.mode')}</span>`)}
 		</h1>
+		<p class="text-on-surface-variant text-sm max-w-md mx-auto">{t('home.meta')}</p>
 	</div>
 
 	<!-- ═══ Cards ═══ -->
-	<main class="relative z-10 max-w-4xl mx-auto px-4 pb-28 pt-4">
-		<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+	<main class="relative z-10 max-w-5xl mx-auto px-4 pb-28 pt-2">
+		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
 			{#each GAMES as game, i}
-				<a
-					href="/{game.id}"
-					onclick={(e) => navigateTo(e, `/${game.id}`, i)}
-					class="game-card group relative overflow-hidden rounded-2xl liquid-card {game.borderClass} flex flex-col cursor-pointer"
-				>
+				{@const onlineHref = getOnlineHref(game)}
+				{@const localHref = getLocalHref(game)}
+				<div class="game-card group relative overflow-hidden rounded-2xl liquid-card {game.borderClass} flex flex-col">
 					<!-- Glow interior en hover -->
 					<div
 						class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
@@ -99,36 +112,71 @@
 					></div>
 
 					<!-- Barra superior de color -->
-					<div class="h-0.75 w-full flex-none" style={game.barStyle}></div>
+					<div class="h-1 w-full flex-none" style={game.barStyle}></div>
 
 					<!-- Cuerpo -->
 					<div class="relative flex-1 flex flex-col gap-4 p-5">
 						<!-- Número + Icono -->
 						<div class="flex items-start justify-between">
 							<span class="font-headline text-[10px] font-bold tracking-[0.2em] text-on-surface-variant/30 mt-1">{game.num}</span>
-							<div bind:this={iconEls[i]} class="icon-box w-14 h-14 rounded-xl liquid-card {game.borderClass} flex items-center justify-center">
-								<span
-									class="iconify {game.icon} {game.iconColorClass} text-3xl"
-								></span>
+							<div bind:this={iconEls[i]} class="icon-box w-16 h-16 rounded-xl liquid-card {game.borderClass} flex items-center justify-center">
+								<span class="iconify {game.icon} {game.iconColorClass} text-4xl"></span>
 							</div>
 						</div>
 
 						<!-- Texto -->
 						<div class="flex-1">
-							<h2 bind:this={titleEls[i]} class="font-headline font-black text-xl leading-tight text-on-surface mb-1.5">{@html game.cardTitleHtml}</h2>
+							<h2 bind:this={titleEls[i]} class="font-headline font-black text-xl leading-tight text-on-surface mb-2">{@html game.cardTitleHtml}</h2>
 							<p class="font-body text-xs text-on-surface-variant leading-relaxed">{t(`game.${game.id}.description`)}</p>
 						</div>
 
-						<!-- CTA -->
-						<div class="flex items-center justify-between border-t border-white/8 pt-4">
-							<span class="px-3 py-1 rounded-full {game.badgeClass} text-[10px] font-black uppercase tracking-widest">
-								{t('home.play')}
-							</span>
-							<span class="iconify material-symbols--arrow-forward {game.iconColorClass} text-lg opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200">
-							</span>
+						<!-- Tipo badge -->
+						<div class="flex items-center gap-2">
+							{#if game.type === 'guess'}
+								<span class="px-2.5 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-[10px] font-bold uppercase tracking-widest">1 jugador</span>
+							{:else if game.type === 'basta' || game.type === 'external'}
+								<span class="px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold uppercase tracking-widest">2+ {getLocale() === 'en' ? 'players' : 'jugadores'}</span>
+							{:else}
+								<span class="px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold uppercase tracking-widest">{t('home.players')}</span>
+							{/if}
+						</div>
+
+						<!-- Botones Local / Online -->
+						<div class="flex gap-2 pt-2 border-t border-white/8">
+							{#if localHref}
+								{#if game.externalUrl}
+									<a
+										href={localHref}
+										target="_blank"
+										rel="noopener"
+										class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl {game.badgeClass} text-xs font-black uppercase tracking-widest transition-all active:scale-95 hover:brightness-110"
+									>
+										<span class="iconify material-symbols--open-in-new text-sm"></span>
+										{t('home.play')}
+									</a>
+								{:else}
+									<a
+										href={localHref}
+										onclick={(e) => navigateTo(e, localHref, i)}
+										class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl {game.badgeClass} text-xs font-black uppercase tracking-widest transition-all active:scale-95 hover:brightness-110"
+									>
+										<span class="iconify material-symbols--smartphone text-sm"></span>
+										Local
+									</a>
+								{/if}
+							{/if}
+							{#if onlineHref}
+								<a
+									href={onlineHref}
+									class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl {localHref ? 'bg-surface-container-high border border-outline-variant/20 text-on-surface' : game.badgeClass} text-xs font-black uppercase tracking-widest transition-all active:scale-95 hover:bg-surface-container-highest"
+								>
+									<span class="iconify material-symbols--wifi text-secondary text-sm"></span>
+									Online
+								</a>
+							{/if}
 						</div>
 					</div>
-				</a>
+				</div>
 			{/each}
 		</div>
 

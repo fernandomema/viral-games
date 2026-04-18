@@ -249,4 +249,10 @@ registerLocale('es', {
 	'guess.far': 'Lejos',
 	'guess.playAgain': 'Jugar de nuevo',
 	'guess.newGame': 'Nueva partida',
+
+	// ── Tragos Locos ─────────────────────────────────────────────
+	'game.tragos-locos.description': 'El mejor juego de bebidas para fiestas. Retos, preguntas y diversión.',
+	'game.tragos-locos.heroSubtitle': '¡A beber!',
+	'game.tragos-locos.heroDescription': 'Juego de bebidas con tarjetas de retos, preguntas atrevidas y modos para todo tipo de fiestas.',
+	'game.tragos-locos.playerLabel': 'Jugador',
 });

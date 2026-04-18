@@ -249,4 +249,10 @@ registerLocale('en', {
 	'guess.far': 'Far away',
 	'guess.playAgain': 'Play again',
 	'guess.newGame': 'New game',
+
+	// ── Tragos Locos ─────────────────────────────────────────────
+	'game.tragos-locos.description': 'The best drinking game for parties. Challenges, questions and fun.',
+	'game.tragos-locos.heroSubtitle': 'Drink up!',
+	'game.tragos-locos.heroDescription': 'Drinking game with challenge cards, daring questions and modes for all kinds of parties.',
+	'game.tragos-locos.playerLabel': 'Player',
 });

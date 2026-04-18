@@ -19,6 +19,7 @@
 	import { setActiveGame } from '$lib/active-game';
 	import { haptic, hapticTap } from '$lib/haptics';
 	import { t, getLocale } from '$lib/i18n';
+	import { getGameSeo } from '$lib/games/seo';
 
 	let { data } = $props();
 	let game: GameDef = $derived(data.game);
@@ -28,6 +29,8 @@
 
 	// Guess engine (separate — single-player)
 	let isGuessGame = $derived(game.type === 'guess');
+	let isExternalGame = $derived(game.type === 'external');
+	let seo = $derived(getGameSeo(game.id, getLocale()));
 	// eslint-disable-next-line -- intentionally capturing initial game type for engine creation
 	const guessEngine: PalabraOcultaEngine | null = (() => data.game.type === 'guess' ? createPalabraOcultaGame() : null)();
 	let guessState = $state<PalabraOcultaState | null>(guessEngine ? guessEngine.getState() : null);
@@ -359,6 +362,20 @@
 	let isGreen = $derived(game.id === 'impostor');
 </script>
 
+<svelte:head>
+	{#if seo && seo.faqs.length > 0}
+		{@html `<script type="application/ld+json">${JSON.stringify({
+			"@context": "https://schema.org",
+			"@type": "FAQPage",
+			mainEntity: seo.faqs.map(f => ({
+				"@type": "Question",
+				name: f.question,
+				acceptedAnswer: { "@type": "Answer", text: f.answer }
+			}))
+		})}</script>`}
+	{/if}
+</svelte:head>
+
 <!-- ═══ TopAppBar ═══ -->
 <header class="fixed top-0 w-full z-50 flex items-center justify-between px-4 h-16 bg-background/90 border-b border-outline-variant/20 shadow-[0_0_20px_rgba(202,152,255,0.08)]" style="backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)">
 	<div class="flex items-center gap-1">
@@ -378,7 +395,7 @@
 <main class="pt-20 pb-32 px-6 w-full min-h-dvh max-w-6xl mx-auto">
 
 	<!-- ═══════════════ LOBBY PHASE ═══════════════ -->
-	{#if !isGuessGame && gameState.phase === 'lobby'}
+	{#if !isGuessGame && !isExternalGame && gameState.phase === 'lobby'}
 		<div class="lg:grid lg:grid-cols-[1fr_380px] lg:gap-12 lg:items-start">
 			<!-- Left column: Hero + Players -->
 			<div>
@@ -995,6 +1012,34 @@
 		</div>
 	{/if}
 
+	<!-- ═══════════════ EXTERNAL GAME LANDING ═══════════════ -->
+	{#if isExternalGame}
+		<div class="max-w-lg mx-auto">
+			<GameHero {game} isGreen={false} bind:iconEl={heroIconEl} bind:titleEl={heroTitleEl} />
+
+			<div class="glass-panel rounded-2xl p-6 border border-outline-variant/20 mb-8">
+				<h3 class="font-headline font-bold text-lg text-on-surface mb-3">{t(`game.${game.id}.heroSubtitle`)}</h3>
+				<p class="text-on-surface-variant text-sm leading-relaxed mb-4">{t(`game.${game.id}.heroDescription`)}</p>
+
+				<div class="flex flex-wrap gap-2 mb-4">
+					<span class="px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-bold">🍻 Bebidas</span>
+					<span class="px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-bold">🎉 Fiestas</span>
+					<span class="px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-bold">👥 Grupos</span>
+				</div>
+			</div>
+
+			<a
+				href={game.externalUrl}
+				target="_blank"
+				rel="noopener"
+				class="w-full py-5 rounded-xl bg-linear-to-r from-orange-600 to-orange-400 text-white font-headline font-bold text-xl uppercase tracking-widest shadow-[0_0_30px_rgba(249,115,22,0.3)] hover:shadow-[0_0_45px_rgba(249,115,22,0.5)] active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+			>
+				{t('home.play')}
+				<span class="iconify material-symbols--open-in-new text-lg"></span>
+			</a>
+		</div>
+	{/if}
+
 	<!-- ═══════════════ GUESS GAME (Palabra Oculta) ═══════════════ -->
 	{#if isGuessGame && guessState}
 		{#if guessState.phase === 'lobby'}
@@ -1132,4 +1177,29 @@
 			</div>
 		{/if}
 	{/if}
+
+	<!-- SEO Content & FAQs -->
+	{#if seo}
+		<section class="max-w-2xl mx-auto px-4 pb-12 pt-8 space-y-8">
+			<div class="text-on-surface-variant text-sm leading-relaxed">
+				<p>{seo.description}</p>
+			</div>
+
+			{#if seo.faqs.length > 0}
+				<div class="space-y-3">
+					<h2 class="font-headline text-lg font-bold text-on-surface">{getLocale() === 'en' ? 'Frequently Asked Questions' : 'Preguntas Frecuentes'}</h2>
+					{#each seo.faqs as faq}
+						<details class="group bg-surface-container-high rounded-xl border border-outline-variant/10">
+							<summary class="cursor-pointer p-4 font-bold text-on-surface text-sm flex items-center justify-between">
+								{faq.question}
+								<span class="iconify material-symbols--expand-more text-on-surface-variant transition-transform group-open:rotate-180"></span>
+							</summary>
+							<div class="px-4 pb-4 text-on-surface-variant text-sm leading-relaxed">{faq.answer}</div>
+						</details>
+					{/each}
+				</div>
+			{/if}
+		</section>
+	{/if}
 </main>
+
