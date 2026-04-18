@@ -2,11 +2,12 @@
 	import { goto } from '$app/navigation';
 	import { getActiveGame, clearActiveGame } from '$lib/active-game';
 	import { GAMES } from '$lib/games/registry';
-	import { t, getLocale, setLocale, SUPPORTED_LOCALES, LOCALE_LABELS } from '$lib/i18n';
+	import { t, getLocale, setLocale, SUPPORTED_LOCALES } from '$lib/i18n';
 	import type { Locale } from '$lib/i18n';
+	import GameCard from '$lib/components/GameCard.svelte';
 
-	let titleEls: HTMLElement[] = [];
-	let iconEls: HTMLElement[] = [];
+	let titleEls: (HTMLElement | undefined)[] = $state(Array(GAMES.length));
+	let iconEls: (HTMLElement | undefined)[] = $state(Array(GAMES.length));
 
 	// Restore hero names when navigating back from a game page
 	$effect(() => {
@@ -37,18 +38,6 @@
 		const i = SUPPORTED_LOCALES.indexOf(current);
 		const next = SUPPORTED_LOCALES[(i + 1) % SUPPORTED_LOCALES.length];
 		setLocale(next);
-	}
-
-	function getOnlineHref(game: typeof GAMES[0]): string | null {
-		if (!game.onlineEnabled) return null;
-		if (game.id === 'basta') return '/basta';
-		return `/online/${game.id}`;
-	}
-
-	function getLocalHref(game: typeof GAMES[0]): string | null {
-		if (!game.localEnabled) return null;
-		if (game.externalUrl) return game.externalUrl;
-		return `/${game.id}`;
 	}
 </script>
 
@@ -100,97 +89,34 @@
 
 	<!-- ═══ Cards ═══ -->
 	<main class="relative z-10 max-w-5xl mx-auto px-4 pb-28 pt-2">
+		<!-- Section header -->
+		<div class="flex items-center justify-between mb-5">
+			<h2 class="font-headline text-base font-bold text-on-surface tracking-tight">{getLocale() === 'en' ? 'Pick your game' : 'Elige tu juego'}</h2>
+			<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/50 bg-surface-container-high border border-outline-variant/20 rounded-full px-3 py-1">{GAMES.length} {t('home.modes')}</span>
+		</div>
+
 		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
 			{#each GAMES as game, i}
-				{@const onlineHref = getOnlineHref(game)}
-				{@const localHref = getLocalHref(game)}
-				<div class="game-card group relative overflow-hidden rounded-2xl liquid-card {game.borderClass} flex flex-col">
-					<!-- Glow interior en hover -->
-					<div
-						class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-						style="background: radial-gradient(ellipse at 50% -20%, {game.hoverGlow} 0%, transparent 65%)"
-					></div>
-
-					<!-- Barra superior de color -->
-					<div class="h-1 w-full flex-none" style={game.barStyle}></div>
-
-					<!-- Cuerpo -->
-					<div class="relative flex-1 flex flex-col gap-4 p-5">
-						<!-- Número + Icono -->
-						<div class="flex items-start justify-between">
-							<span class="font-headline text-[10px] font-bold tracking-[0.2em] text-on-surface-variant/30 mt-1">{game.num}</span>
-							<div bind:this={iconEls[i]} class="icon-box w-16 h-16 rounded-xl liquid-card {game.borderClass} flex items-center justify-center">
-								<span class="iconify {game.icon} {game.iconColorClass} text-4xl"></span>
-							</div>
-						</div>
-
-						<!-- Texto -->
-						<div class="flex-1">
-							<h2 bind:this={titleEls[i]} class="font-headline font-black text-xl leading-tight text-on-surface mb-2">{@html game.cardTitleHtml}</h2>
-							<p class="font-body text-xs text-on-surface-variant leading-relaxed">{t(`game.${game.id}.description`)}</p>
-						</div>
-
-						<!-- Tipo badge -->
-						<div class="flex items-center gap-2">
-							{#if game.type === 'guess'}
-								<span class="px-2.5 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-[10px] font-bold uppercase tracking-widest">1 jugador</span>
-							{:else if game.type === 'basta' || game.type === 'external'}
-								<span class="px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold uppercase tracking-widest">2+ {getLocale() === 'en' ? 'players' : 'jugadores'}</span>
-							{:else}
-								<span class="px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold uppercase tracking-widest">{t('home.players')}</span>
-							{/if}
-						</div>
-
-						<!-- Botones Local / Online -->
-						<div class="flex gap-2 pt-2 border-t border-white/8">
-							{#if localHref}
-								{#if game.externalUrl}
-									<a
-										href={localHref}
-										target="_blank"
-										rel="noopener"
-										class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl {game.badgeClass} text-xs font-black uppercase tracking-widest transition-all active:scale-95 hover:brightness-110"
-									>
-										<span class="iconify material-symbols--open-in-new text-sm"></span>
-										{t('home.play')}
-									</a>
-								{:else}
-									<a
-										href={localHref}
-										onclick={(e) => navigateTo(e, localHref, i)}
-										class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl {game.badgeClass} text-xs font-black uppercase tracking-widest transition-all active:scale-95 hover:brightness-110"
-									>
-										<span class="iconify material-symbols--smartphone text-sm"></span>
-										Local
-									</a>
-								{/if}
-							{/if}
-							{#if onlineHref}
-								<a
-									href={onlineHref}
-									class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl {localHref ? 'bg-surface-container-high border border-outline-variant/20 text-on-surface' : game.badgeClass} text-xs font-black uppercase tracking-widest transition-all active:scale-95 hover:bg-surface-container-highest"
-								>
-									<span class="iconify material-symbols--wifi text-secondary text-sm"></span>
-									Online
-								</a>
-							{/if}
-						</div>
-					</div>
+				<div class={i === 0 ? 'sm:col-span-2 lg:col-span-2' : ''}>
+					<GameCard {game} index={i} onNavigate={navigateTo} bind:titleEl={titleEls[i]} bind:iconEl={iconEls[i]} featured={i === 0} />
 				</div>
 			{/each}
 		</div>
 
 		<!-- Stats -->
 		<div class="mt-10 flex items-center justify-center">
-			<div class="inline-flex items-center gap-5 px-6 py-3 rounded-2xl liquid-card border border-white/8">
-				<div class="flex items-center gap-2">
-					<span class="iconify material-symbols--group text-primary text-sm"></span>
-					<span class="font-label text-xs text-on-surface-variant">{t('home.players')}</span>
+			<div class="inline-flex items-center liquid-card border border-white/8 rounded-2xl overflow-hidden divide-x divide-white/8">
+				<div class="flex flex-col items-center px-6 py-4">
+					<span class="font-headline text-2xl font-black text-primary">{GAMES.length}</span>
+					<span class="font-label text-[10px] text-on-surface-variant uppercase tracking-widest mt-0.5">{t('home.modes')}</span>
 				</div>
-				<div class="w-px h-4 bg-white/10"></div>
-				<div class="flex items-center gap-2">
-					<span class="iconify material-symbols--wifi text-secondary text-sm"></span>
-					<span class="font-label text-xs text-on-surface-variant">{t('home.offline')}</span>
+				<div class="flex flex-col items-center px-6 py-4">
+					<span class="font-headline text-2xl font-black text-secondary">3+</span>
+					<span class="font-label text-[10px] text-on-surface-variant uppercase tracking-widest mt-0.5">{getLocale() === 'en' ? 'Players' : 'Jugadores'}</span>
+				</div>
+				<div class="flex flex-col items-center px-6 py-4">
+					<span class="font-headline text-2xl font-black text-green-400">∞</span>
+					<span class="font-label text-[10px] text-on-surface-variant uppercase tracking-widest mt-0.5">{getLocale() === 'en' ? 'Fun' : 'Risas'}</span>
 				</div>
 			</div>
 		</div>
@@ -217,17 +143,4 @@
 	}
 	.orb-a { animation: orb-breathe 10s ease-in-out infinite; }
 	.orb-b { animation: orb-breathe 14s ease-in-out infinite 4s; }
-
-	.game-card {
-		transition: transform 280ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 280ms ease;
-	}
-	.game-card:hover  { transform: translateY(-6px) scale(1.02); }
-	.game-card:active { transform: scale(0.96); transition-duration: 100ms; }
-
-	.icon-box {
-		transition: transform 280ms cubic-bezier(0.34, 1.56, 0.64, 1);
-	}
-	.game-card:hover .icon-box {
-		transform: scale(1.1) rotate(-5deg);
-	}
 </style>

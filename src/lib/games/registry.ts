@@ -1,4 +1,4 @@
-export type GameType = 'word' | 'draw' | 'fact' | 'basta' | 'guess' | 'external';
+export type GameType = 'word' | 'draw' | 'fact' | 'basta' | 'guess' | 'external' | 'crossword';
 
 export interface GameDef {
 	id: string;
@@ -223,6 +223,37 @@ export const GAMES: GameDef[] = [
 			'Juego de bebidas con tarjetas de retos, preguntas atrevidas y modos para todo tipo de fiestas.',
 		playerLabel: 'Jugador',
 		inputPlaceholder: '',
+		citizenLabel: '',
+		revealHiddenText: '',
+		votingTitle: '',
+		votingSubtitle: '',
+	},
+	{
+		id: 'crossword',
+		type: 'crossword',
+		discordEnabled: false,
+		onlineEnabled: true,
+		localEnabled: true,
+		num: '07',
+		cardTitleHtml:
+			'<span style="background:linear-gradient(90deg,#0ea5e9,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">CRUCIGRAMA</span>',
+		description: 'Resuelve el crucigrama más rápido que tus rivales.',
+		icon: 'material-symbols--grid-on',
+		borderClass: 'neon-border-sky',
+		badgeClass: 'bg-sky-600 text-white',
+		iconColorClass: 'text-sky-500',
+		barStyle: 'background: linear-gradient(90deg, #0ea5e9, #38bdf8)',
+		hoverGlow: 'rgba(14,165,233,0.2)',
+		headerIcon: 'material-symbols--grid-on',
+		headerTitle: 'CRUCIGRAMA',
+		heroIcon: 'material-symbols--grid-on',
+		heroSubtitle: '¡A resolver!',
+		heroTitleHtml:
+			'<span class="text-transparent bg-clip-text bg-linear-to-r from-sky-500 to-sky-300">CRUCIGRAMA</span>',
+		heroDescription:
+			'Compite por resolver más palabras del crucigrama. ¡Cada palabra solo la puede resolver un jugador!',
+		playerLabel: 'Jugador',
+		inputPlaceholder: 'Tu nombre',
 		citizenLabel: '',
 		revealHiddenText: '',
 		votingTitle: '',

@@ -363,6 +363,10 @@
 </script>
 
 <svelte:head>
+	<title>{game.headerTitle} — Jugar Gratis Online | Viral Games</title>
+	{#if seo}
+		<meta name="description" content={seo.description} />
+	{/if}
 	{#if seo && seo.faqs.length > 0}
 		{@html `<script type="application/ld+json">${JSON.stringify({
 			"@context": "https://schema.org",

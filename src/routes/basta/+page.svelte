@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { GameDef } from '$lib/games/registry';
 	import { haptic, hapticTap } from '$lib/haptics';
-	import { t } from '$lib/i18n';
+	import { t, getLocale } from '$lib/i18n';
+	import { getGameSeo } from '$lib/games/seo';
 	import { goto } from '$app/navigation';
 	import { beforeNavigate } from '$app/navigation';
 	import { setActiveGame } from '$lib/active-game';
@@ -264,7 +265,27 @@
 		navigator.clipboard.writeText(url.toString());
 		hapticTap();
 	}
+
+	let seo = $derived(getGameSeo('basta', getLocale()));
 </script>
+
+<svelte:head>
+	<title>¡Basta! — Jugar Gratis Online | Viral Games</title>
+	{#if seo}
+		<meta name="description" content={seo.description} />
+	{/if}
+	{#if seo && seo.faqs.length > 0}
+		{@html `<script type="application/ld+json">${JSON.stringify({
+			"@context": "https://schema.org",
+			"@type": "FAQPage",
+			mainEntity: seo.faqs.map(f => ({
+				"@type": "Question",
+				name: f.question,
+				acceptedAnswer: { "@type": "Answer", text: f.answer }
+			}))
+		})}</script>`}
+	{/if}
+</svelte:head>
 
 <div class="min-h-dvh text-on-background flex flex-col">
 
@@ -423,6 +444,29 @@
 					{/if}
 				</div>
 			</div>
+
+			<!-- SEO Content & FAQs -->
+			{#if seo}
+				<section class="max-w-2xl mx-auto px-4 pb-12 pt-8 space-y-8">
+					<div class="text-on-surface-variant text-sm leading-relaxed">
+						<p>{seo.description}</p>
+					</div>
+					{#if seo.faqs.length > 0}
+						<div class="space-y-3">
+							<h2 class="font-headline text-lg font-bold text-on-surface">{getLocale() === 'en' ? 'Frequently Asked Questions' : 'Preguntas Frecuentes'}</h2>
+							{#each seo.faqs as faq}
+								<details class="group bg-surface-container-high rounded-xl border border-outline-variant/10">
+									<summary class="cursor-pointer p-4 font-bold text-on-surface text-sm flex items-center justify-between">
+										{faq.question}
+										<span class="iconify material-symbols--expand-more text-on-surface-variant transition-transform group-open:rotate-180"></span>
+									</summary>
+									<div class="px-4 pb-4 text-on-surface-variant text-sm leading-relaxed">{faq.answer}</div>
+								</details>
+							{/each}
+						</div>
+					{/if}
+				</section>
+			{/if}
 		</main>
 
 	<!-- Connecting -->

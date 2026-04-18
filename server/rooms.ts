@@ -7,10 +7,11 @@ import { createImpostorGame, type ImpostorEngine } from '../src/lib/games/impost
 import { createImpostorDrawGame, type ImpostorDrawEngine } from '../src/lib/games/impostor-draw/engine.js';
 import { createImpostorDatosGame, type ImpostorDatosEngine } from '../src/lib/games/impostor-datos/engine.js';
 import { createBastaGame, type BastaEngine } from '../src/lib/games/basta/engine.js';
+import { createCrosswordGame, type CrosswordEngine } from '../src/lib/games/crossword/engine.js';
 import type { WebSocket } from 'ws';
 
-export type GameId = 'impostor' | 'impostor-draw' | 'impostor-datos' | 'basta';
-export type GameEngine = ImpostorEngine | ImpostorDrawEngine | ImpostorDatosEngine | BastaEngine;
+export type GameId = 'impostor' | 'impostor-draw' | 'impostor-datos' | 'basta' | 'crossword';
+export type GameEngine = ImpostorEngine | ImpostorDrawEngine | ImpostorDatosEngine | BastaEngine | CrosswordEngine;
 
 function createEngine(gameId: GameId): GameEngine {
 	switch (gameId) {
@@ -18,6 +19,7 @@ function createEngine(gameId: GameId): GameEngine {
 		case 'impostor-draw': return createImpostorDrawGame();
 		case 'impostor-datos': return createImpostorDatosGame();
 		case 'basta': return createBastaGame();
+		case 'crossword': return createCrosswordGame();
 		default: throw new Error(`Juego desconocido: ${gameId}`);
 	}
 }
@@ -133,6 +135,30 @@ export function getPlayerView(room: Room, discordUserId: string) {
 			avatar: rp2?.avatar ?? null,
 		};
 	});
+
+	// Crossword game
+	if (room.gameId === 'crossword') {
+		const cwEngine = room.engine as CrosswordEngine;
+		const cwState = cwEngine.getState();
+
+		let winners: string[] | undefined;
+		if (cwState.phase === 'results') {
+			winners = cwEngine.getWinners().map((w: any) => w.name);
+		}
+
+		return {
+			type: 'state' as const,
+			state: {
+				...cwState,
+				players: playersWithAvatars,
+			},
+			myRole: rp ? { playerId: rp.enginePlayerId } : null,
+			hostDiscordUserId: room.hostDiscordUserId,
+			roomId: room.id,
+			gameId: room.gameId,
+			winners,
+		};
+	}
 
 	// Basta game — no roles, different state shape
 	if (room.gameId === 'basta') {

@@ -34,6 +34,7 @@
 </script>
 
 <svelte:head>
+	<title>Viral Games — Juegos de Grupo para Fiestas y Amigos | Gratis Online</title>
 	<meta name="description" content={t('home.meta')} />
 </svelte:head>
 

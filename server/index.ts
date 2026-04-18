@@ -282,6 +282,33 @@ function handleMessage(ws: WebSocket, client: ClientState, msg: any) {
 			break;
 		}
 
+		// ── Crossword-specific messages ──────────────────────────
+		case 'crosswordSubmit': {
+			const room = getRoom(client.roomId!);
+			if (!room || room.gameId !== 'crossword') throw new Error('No es un juego de crossword');
+
+			const rp = room.players.find(p => p.discordUserId === client.discordUserId);
+			if (!rp) throw new Error('No estás en la room');
+
+			const cwEngine = room.engine as import('../src/lib/games/crossword/engine.js').CrosswordEngine;
+			const success = cwEngine.submitWord(msg.wordIndex, msg.answer, rp.enginePlayerId);
+			ws.send(JSON.stringify({ type: 'crosswordResult', success, wordIndex: msg.wordIndex }));
+			if (success) broadcastState(room);
+			break;
+		}
+
+		case 'crosswordStart': {
+			const room = getRoom(client.roomId!);
+			if (!room || room.gameId !== 'crossword') throw new Error('No es un juego de crossword');
+			if (room.hostDiscordUserId !== client.discordUserId) {
+				throw new Error('Solo el host puede iniciar la partida');
+			}
+			const cwEngine2 = room.engine as import('../src/lib/games/crossword/engine.js').CrosswordEngine;
+			cwEngine2.startGame();
+			broadcastState(room);
+			break;
+		}
+
 		case 'skipToVoting': {
 			const room = getRoom(client.roomId!);
 			if (!room || room.hostDiscordUserId !== client.discordUserId) {

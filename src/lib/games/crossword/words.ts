@@ -1,0 +1,262 @@
+/**
+ * Crossword word bank — categorized Spanish words for procedural crossword generation.
+ * Words are 3-10 letters, no accents/ñ (simplified for grid), uppercase.
+ */
+
+export interface CrosswordWord {
+	word: string;
+	clue: string;
+	category: string;
+}
+
+const WORDS_ES: CrosswordWord[] = [
+	// ── Animales ──
+	{ word: 'GATO', clue: 'Felino doméstico', category: 'animales' },
+	{ word: 'PERRO', clue: 'Mejor amigo del hombre', category: 'animales' },
+	{ word: 'LEON', clue: 'Rey de la selva', category: 'animales' },
+	{ word: 'TIGRE', clue: 'Felino con rayas', category: 'animales' },
+	{ word: 'OSO', clue: 'Mamífero grande y peludo', category: 'animales' },
+	{ word: 'LOBO', clue: 'Aúlla a la luna', category: 'animales' },
+	{ word: 'ZORRO', clue: 'Animal astuto', category: 'animales' },
+	{ word: 'CABALLO', clue: 'Se monta para galopar', category: 'animales' },
+	{ word: 'VACA', clue: 'Da leche', category: 'animales' },
+	{ word: 'CERDO', clue: 'Rosado de granja', category: 'animales' },
+	{ word: 'PATO', clue: 'Ave que nada', category: 'animales' },
+	{ word: 'RANA', clue: 'Anfibio verde', category: 'animales' },
+	{ word: 'BUHO', clue: 'Ave nocturna sabia', category: 'animales' },
+	{ word: 'RATON', clue: 'Roedor pequeño', category: 'animales' },
+	{ word: 'MONO', clue: 'Primate juguetón', category: 'animales' },
+	{ word: 'BURRO', clue: 'Animal de carga terco', category: 'animales' },
+	{ word: 'CIERVO', clue: 'Tiene astas grandes', category: 'animales' },
+	{ word: 'FOCA', clue: 'Mamífero marino que ladra', category: 'animales' },
+	{ word: 'PULPO', clue: 'Tiene ocho tentáculos', category: 'animales' },
+	{ word: 'COBRA', clue: 'Serpiente venenosa con capucha', category: 'animales' },
+
+	// ── Comida ──
+	{ word: 'PIZZA', clue: 'Plato italiano redondo', category: 'comida' },
+	{ word: 'TACO', clue: 'Tortilla doblada con relleno', category: 'comida' },
+	{ word: 'SOPA', clue: 'Caldo caliente', category: 'comida' },
+	{ word: 'PAN', clue: 'Base del bocadillo', category: 'comida' },
+	{ word: 'ARROZ', clue: 'Grano blanco asiático', category: 'comida' },
+	{ word: 'QUESO', clue: 'Derivado de la leche sólido', category: 'comida' },
+	{ word: 'HUEVO', clue: 'Lo pone la gallina', category: 'comida' },
+	{ word: 'PASTA', clue: 'Espagueti, macarrones...', category: 'comida' },
+	{ word: 'POLLO', clue: 'Carne blanca de ave', category: 'comida' },
+	{ word: 'FRESA', clue: 'Fruta roja pequeña', category: 'comida' },
+	{ word: 'LIMON', clue: 'Cítrico ácido amarillo', category: 'comida' },
+	{ word: 'MANGO', clue: 'Fruta tropical dulce', category: 'comida' },
+	{ word: 'CARNE', clue: 'Proteína animal', category: 'comida' },
+	{ word: 'TORTA', clue: 'Pastel de cumpleaños', category: 'comida' },
+	{ word: 'JAMON', clue: 'Embutido de cerdo curado', category: 'comida' },
+	{ word: 'MIEL', clue: 'Dulce que hacen las abejas', category: 'comida' },
+	{ word: 'NUEZ', clue: 'Fruto seco duro', category: 'comida' },
+	{ word: 'CHILE', clue: 'Picante mexicano', category: 'comida' },
+	{ word: 'CAFE', clue: 'Bebida que despierta', category: 'comida' },
+	{ word: 'LECHE', clue: 'Bebida blanca de vaca', category: 'comida' },
+
+	// ── Países / Geografía ──
+	{ word: 'PERU', clue: 'País del Machu Picchu', category: 'geografia' },
+	{ word: 'CUBA', clue: 'Isla caribeña', category: 'geografia' },
+	{ word: 'CHILE', clue: 'País largo y angosto', category: 'geografia' },
+	{ word: 'MEXICO', clue: 'País de los tacos', category: 'geografia' },
+	{ word: 'BRASIL', clue: 'País del carnaval', category: 'geografia' },
+	{ word: 'PLAYA', clue: 'Arena junto al mar', category: 'geografia' },
+	{ word: 'MONTE', clue: 'Elevación de terreno', category: 'geografia' },
+	{ word: 'RIO', clue: 'Corriente de agua dulce', category: 'geografia' },
+	{ word: 'ISLA', clue: 'Tierra rodeada de agua', category: 'geografia' },
+	{ word: 'LAGO', clue: 'Agua dulce interior', category: 'geografia' },
+	{ word: 'SELVA', clue: 'Bosque tropical denso', category: 'geografia' },
+	{ word: 'NORTE', clue: 'Punto cardinal arriba', category: 'geografia' },
+	{ word: 'COSTA', clue: 'Borde junto al mar', category: 'geografia' },
+	{ word: 'VOLCAN', clue: 'Montaña que erupciona', category: 'geografia' },
+	{ word: 'DESIERTO', clue: 'Terreno árido y seco', category: 'geografia' },
+
+	// ── Deportes ──
+	{ word: 'GOL', clue: 'Punto en fútbol', category: 'deportes' },
+	{ word: 'RED', clue: 'Donde cae el balón en tenis', category: 'deportes' },
+	{ word: 'BOXEO', clue: 'Deporte de puños', category: 'deportes' },
+	{ word: 'TENIS', clue: 'Deporte con raqueta', category: 'deportes' },
+	{ word: 'NADO', clue: 'Deporte en piscina', category: 'deportes' },
+	{ word: 'SALTO', clue: 'Elevarse del suelo', category: 'deportes' },
+	{ word: 'LUCHA', clue: 'Combate cuerpo a cuerpo', category: 'deportes' },
+	{ word: 'BOTE', clue: 'Embarcación pequeña', category: 'deportes' },
+	{ word: 'PISTA', clue: 'Donde se corre en atletismo', category: 'deportes' },
+	{ word: 'CAMPO', clue: 'Donde se juega fútbol', category: 'deportes' },
+	{ word: 'BALON', clue: 'Se patea o lanza', category: 'deportes' },
+	{ word: 'JUGADOR', clue: 'Quien practica un deporte', category: 'deportes' },
+	{ word: 'EQUIPO', clue: 'Grupo que juega junto', category: 'deportes' },
+	{ word: 'CANCHA', clue: 'Terreno de juego', category: 'deportes' },
+
+	// ── Objetos ──
+	{ word: 'MESA', clue: 'Mueble con cuatro patas', category: 'objetos' },
+	{ word: 'SILLA', clue: 'Para sentarse', category: 'objetos' },
+	{ word: 'RELOJ', clue: 'Marca la hora', category: 'objetos' },
+	{ word: 'LIBRO', clue: 'Se lee', category: 'objetos' },
+	{ word: 'LLAVE', clue: 'Abre cerraduras', category: 'objetos' },
+	{ word: 'VELA', clue: 'Luz con llama', category: 'objetos' },
+	{ word: 'CUCHILLO', clue: 'Para cortar comida', category: 'objetos' },
+	{ word: 'ESPEJO', clue: 'Refleja tu imagen', category: 'objetos' },
+	{ word: 'BOLSA', clue: 'Para llevar cosas', category: 'objetos' },
+	{ word: 'CAJA', clue: 'Contenedor cuadrado', category: 'objetos' },
+	{ word: 'PUERTA', clue: 'Entrada a una habitación', category: 'objetos' },
+	{ word: 'CAMA', clue: 'Donde se duerme', category: 'objetos' },
+	{ word: 'TAZA', clue: 'Para beber café o té', category: 'objetos' },
+	{ word: 'PAPEL', clue: 'Se escribe en él', category: 'objetos' },
+	{ word: 'ZAPATO', clue: 'Calzado para el pie', category: 'objetos' },
+
+	// ── Ciencia / Naturaleza ──
+	{ word: 'SOL', clue: 'Estrella del sistema solar', category: 'ciencia' },
+	{ word: 'LUNA', clue: 'Satélite natural de la Tierra', category: 'ciencia' },
+	{ word: 'AGUA', clue: 'H2O', category: 'ciencia' },
+	{ word: 'FUEGO', clue: 'Combustión con llamas', category: 'ciencia' },
+	{ word: 'TIERRA', clue: 'Nuestro planeta', category: 'ciencia' },
+	{ word: 'RAYO', clue: 'Descarga eléctrica en tormenta', category: 'ciencia' },
+	{ word: 'NUBE', clue: 'Vapor de agua en el cielo', category: 'ciencia' },
+	{ word: 'FLOR', clue: 'Parte colorida de la planta', category: 'ciencia' },
+	{ word: 'ARBOL', clue: 'Planta grande con tronco', category: 'ciencia' },
+	{ word: 'PIEDRA', clue: 'Roca pequeña', category: 'ciencia' },
+	{ word: 'HIERRO', clue: 'Metal magnético', category: 'ciencia' },
+	{ word: 'PLATA', clue: 'Metal precioso gris', category: 'ciencia' },
+	{ word: 'ATOMO', clue: 'Unidad más pequeña de materia', category: 'ciencia' },
+	{ word: 'CELULA', clue: 'Unidad básica de la vida', category: 'ciencia' },
+	{ word: 'VIRUS', clue: 'Microorganismo infeccioso', category: 'ciencia' },
+
+	// ── Profesiones ──
+	{ word: 'DOCTOR', clue: 'Profesional de la salud', category: 'profesiones' },
+	{ word: 'CHEF', clue: 'Cocina en restaurante', category: 'profesiones' },
+	{ word: 'PILOTO', clue: 'Conduce aviones', category: 'profesiones' },
+	{ word: 'JUEZ', clue: 'Dicta sentencias', category: 'profesiones' },
+	{ word: 'ACTOR', clue: 'Actúa en películas', category: 'profesiones' },
+	{ word: 'PINTOR', clue: 'Crea cuadros con pintura', category: 'profesiones' },
+	{ word: 'MONJE', clue: 'Vive en un monasterio', category: 'profesiones' },
+	{ word: 'SASTRE', clue: 'Confecciona ropa', category: 'profesiones' },
+	{ word: 'MINERO', clue: 'Trabaja bajo tierra', category: 'profesiones' },
+	{ word: 'PAYASO', clue: 'Divierte en el circo', category: 'profesiones' },
+];
+
+const WORDS_EN: CrosswordWord[] = [
+	// ── Animals ──
+	{ word: 'CAT', clue: 'Domestic feline', category: 'animals' },
+	{ word: 'DOG', clue: "Man's best friend", category: 'animals' },
+	{ word: 'LION', clue: 'King of the jungle', category: 'animals' },
+	{ word: 'TIGER', clue: 'Striped big cat', category: 'animals' },
+	{ word: 'BEAR', clue: 'Large furry mammal', category: 'animals' },
+	{ word: 'WOLF', clue: 'Howls at the moon', category: 'animals' },
+	{ word: 'FOX', clue: 'Cunning animal', category: 'animals' },
+	{ word: 'HORSE', clue: 'You ride to gallop', category: 'animals' },
+	{ word: 'COW', clue: 'Gives milk', category: 'animals' },
+	{ word: 'PIG', clue: 'Pink farm animal', category: 'animals' },
+	{ word: 'DUCK', clue: 'Swimming bird', category: 'animals' },
+	{ word: 'FROG', clue: 'Green amphibian', category: 'animals' },
+	{ word: 'OWL', clue: 'Wise night bird', category: 'animals' },
+	{ word: 'MOUSE', clue: 'Small rodent', category: 'animals' },
+	{ word: 'MONKEY', clue: 'Playful primate', category: 'animals' },
+	{ word: 'DEER', clue: 'Has big antlers', category: 'animals' },
+	{ word: 'SEAL', clue: 'Barking sea mammal', category: 'animals' },
+	{ word: 'SHARK', clue: 'Ocean predator with fins', category: 'animals' },
+	{ word: 'EAGLE', clue: 'Majestic bird of prey', category: 'animals' },
+	{ word: 'SNAKE', clue: 'Legless reptile', category: 'animals' },
+
+	// ── Food ──
+	{ word: 'PIZZA', clue: 'Round Italian dish', category: 'food' },
+	{ word: 'TACO', clue: 'Folded tortilla with filling', category: 'food' },
+	{ word: 'SOUP', clue: 'Hot broth', category: 'food' },
+	{ word: 'BREAD', clue: 'Base of a sandwich', category: 'food' },
+	{ word: 'RICE', clue: 'Asian white grain', category: 'food' },
+	{ word: 'CHEESE', clue: 'Solid dairy product', category: 'food' },
+	{ word: 'EGG', clue: 'Laid by a hen', category: 'food' },
+	{ word: 'PASTA', clue: 'Spaghetti, macaroni...', category: 'food' },
+	{ word: 'STEAK', clue: 'Grilled meat cut', category: 'food' },
+	{ word: 'APPLE', clue: 'Red or green fruit', category: 'food' },
+	{ word: 'LEMON', clue: 'Sour yellow citrus', category: 'food' },
+	{ word: 'MANGO', clue: 'Sweet tropical fruit', category: 'food' },
+	{ word: 'CAKE', clue: 'Birthday dessert', category: 'food' },
+	{ word: 'HONEY', clue: 'Made by bees', category: 'food' },
+	{ word: 'GRAPE', clue: 'Grows in vineyards', category: 'food' },
+	{ word: 'BACON', clue: 'Crispy pork strips', category: 'food' },
+	{ word: 'CORN', clue: 'Yellow cob vegetable', category: 'food' },
+	{ word: 'MILK', clue: 'White drink from cows', category: 'food' },
+
+	// ── Geography ──
+	{ word: 'PERU', clue: 'Machu Picchu country', category: 'geography' },
+	{ word: 'CUBA', clue: 'Caribbean island nation', category: 'geography' },
+	{ word: 'JAPAN', clue: 'Land of the rising sun', category: 'geography' },
+	{ word: 'EGYPT', clue: 'Land of pyramids', category: 'geography' },
+	{ word: 'INDIA', clue: 'Country of Taj Mahal', category: 'geography' },
+	{ word: 'BEACH', clue: 'Sand by the sea', category: 'geography' },
+	{ word: 'RIVER', clue: 'Flowing fresh water', category: 'geography' },
+	{ word: 'ISLAND', clue: 'Land surrounded by water', category: 'geography' },
+	{ word: 'LAKE', clue: 'Inland fresh water', category: 'geography' },
+	{ word: 'NORTH', clue: 'Top cardinal direction', category: 'geography' },
+	{ word: 'COAST', clue: 'Edge by the sea', category: 'geography' },
+	{ word: 'DESERT', clue: 'Arid dry terrain', category: 'geography' },
+	{ word: 'FOREST', clue: 'Dense area of trees', category: 'geography' },
+	{ word: 'CLIFF', clue: 'Steep rock face', category: 'geography' },
+
+	// ── Sports ──
+	{ word: 'GOAL', clue: 'Point in soccer', category: 'sports' },
+	{ word: 'NET', clue: 'Ball falls here in tennis', category: 'sports' },
+	{ word: 'BOXING', clue: 'Fist fighting sport', category: 'sports' },
+	{ word: 'TENNIS', clue: 'Racket sport', category: 'sports' },
+	{ word: 'SWIM', clue: 'Pool sport', category: 'sports' },
+	{ word: 'JUMP', clue: 'Rise off the ground', category: 'sports' },
+	{ word: 'TRACK', clue: 'Where you run in athletics', category: 'sports' },
+	{ word: 'FIELD', clue: 'Where soccer is played', category: 'sports' },
+	{ word: 'BALL', clue: 'Kicked or thrown', category: 'sports' },
+	{ word: 'TEAM', clue: 'Group that plays together', category: 'sports' },
+	{ word: 'RACE', clue: 'Speed competition', category: 'sports' },
+	{ word: 'COACH', clue: 'Trains the team', category: 'sports' },
+
+	// ── Objects ──
+	{ word: 'TABLE', clue: 'Furniture with four legs', category: 'objects' },
+	{ word: 'CHAIR', clue: 'For sitting', category: 'objects' },
+	{ word: 'CLOCK', clue: 'Tells the time', category: 'objects' },
+	{ word: 'BOOK', clue: 'You read it', category: 'objects' },
+	{ word: 'KEY', clue: 'Opens locks', category: 'objects' },
+	{ word: 'CANDLE', clue: 'Light with flame', category: 'objects' },
+	{ word: 'MIRROR', clue: 'Reflects your image', category: 'objects' },
+	{ word: 'DOOR', clue: 'Room entrance', category: 'objects' },
+	{ word: 'BED', clue: 'Where you sleep', category: 'objects' },
+	{ word: 'CUP', clue: 'For drinking coffee', category: 'objects' },
+	{ word: 'PAPER', clue: 'You write on it', category: 'objects' },
+	{ word: 'SHOE', clue: 'Footwear', category: 'objects' },
+	{ word: 'LAMP', clue: 'Provides light', category: 'objects' },
+	{ word: 'BRUSH', clue: 'For hair or painting', category: 'objects' },
+
+	// ── Science ──
+	{ word: 'SUN', clue: 'Solar system star', category: 'science' },
+	{ word: 'MOON', clue: "Earth's natural satellite", category: 'science' },
+	{ word: 'WATER', clue: 'H2O', category: 'science' },
+	{ word: 'FIRE', clue: 'Combustion with flames', category: 'science' },
+	{ word: 'EARTH', clue: 'Our planet', category: 'science' },
+	{ word: 'CLOUD', clue: 'Water vapor in the sky', category: 'science' },
+	{ word: 'FLOWER', clue: 'Colorful part of a plant', category: 'science' },
+	{ word: 'TREE', clue: 'Large plant with trunk', category: 'science' },
+	{ word: 'STONE', clue: 'Small rock', category: 'science' },
+	{ word: 'IRON', clue: 'Magnetic metal', category: 'science' },
+	{ word: 'GOLD', clue: 'Precious yellow metal', category: 'science' },
+	{ word: 'ATOM', clue: 'Smallest unit of matter', category: 'science' },
+	{ word: 'CELL', clue: 'Basic unit of life', category: 'science' },
+	{ word: 'VIRUS', clue: 'Infectious microorganism', category: 'science' },
+	{ word: 'STAR', clue: 'Shines in the night sky', category: 'science' },
+
+	// ── Professions ──
+	{ word: 'DOCTOR', clue: 'Health professional', category: 'professions' },
+	{ word: 'CHEF', clue: 'Cooks in a restaurant', category: 'professions' },
+	{ word: 'PILOT', clue: 'Flies airplanes', category: 'professions' },
+	{ word: 'JUDGE', clue: 'Gives sentences', category: 'professions' },
+	{ word: 'ACTOR', clue: 'Acts in movies', category: 'professions' },
+	{ word: 'NURSE', clue: 'Cares for patients', category: 'professions' },
+	{ word: 'CLERK', clue: 'Works at a counter', category: 'professions' },
+	{ word: 'MINER', clue: 'Works underground', category: 'professions' },
+	{ word: 'CLOWN', clue: 'Entertains at circus', category: 'professions' },
+];
+
+export function getWordBank(locale: string): CrosswordWord[] {
+	return locale === 'en' ? WORDS_EN : WORDS_ES;
+}
+
+export function getWordCategories(locale: string): string[] {
+	const words = getWordBank(locale);
+	return [...new Set(words.map(w => w.category))];
+}
