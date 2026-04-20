@@ -44,11 +44,33 @@
 
 	// ── Discord SDK setup ─────────────────────────────────────────
 	const clientId = import.meta.env.VITE_DISCORD_CLIENT_ID;
+	const DISCORD_READY_TIMEOUT_MS = 10000;
+
+	function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
+		return new Promise<T>((resolve, reject) => {
+			const id = setTimeout(() => reject(new Error(message)), ms);
+			promise
+				.then((value) => {
+					clearTimeout(id);
+					resolve(value);
+				})
+				.catch((err) => {
+					clearTimeout(id);
+					reject(err);
+				});
+		});
+	}
 
 	async function init() {
 		try {
+			if (!clientId) throw new Error('Missing Discord client id (VITE_DISCORD_CLIENT_ID).');
+
 			const discordSdk = new DiscordSDK(clientId);
-			await discordSdk.ready();
+			await withTimeout(
+				discordSdk.ready(),
+				DISCORD_READY_TIMEOUT_MS,
+				'Discord SDK did not become ready. Open this page inside a Discord Activity and try again.'
+			);
 
 			try {
 				const { locale } = await discordSdk.commands.userSettingsGetLocale();
