@@ -6,6 +6,7 @@ registerLocale('en', {
 	'home.chooseMode': 'CHOOSE YOUR MODE',
 	'home.mode': 'MODE',
 	'home.play': 'PLAY',
+	'home.playLocal': 'PLAY LOCAL',
 	'home.players': '3–12 players',
 	'home.offline': 'No internet',
 	'home.meta': 'Social games to play with friends passing the phone',
@@ -47,6 +48,29 @@ registerLocale('en', {
 	'game.basta.heroDescription': 'Fill in the categories with words starting with the chosen letter. The fastest wins!',
 	'game.basta.playerLabel': 'Player',
 	'game.basta.citizenLabel': 'Player',
+	// Probable
+	'game.probable.description': 'Vote who in the group is most likely to do something. Guaranteed laughs!',
+	'game.probable.heroSubtitle': 'Time to vote!',
+	'game.probable.heroDescription': 'Answer who in the group is most likely to do something crazy. The results will surprise you!',
+	'game.probable.playerLabel': 'Player',
+	'game.probable.inputPlaceholder': 'Player name...',
+	// Spyfall
+	'game.spyfall.description': 'Everyone knows the location except the spy. Find them before they guess!',
+	'game.spyfall.heroSubtitle': 'Where are we?',
+	'game.spyfall.heroDescription': 'Everyone knows the secret location, except the spy. Ask questions to find them... without revealing where you are!',
+	'game.spyfall.playerLabel': 'Agent',
+	'game.spyfall.inputPlaceholder': 'Agent name...',
+	'game.spyfall.citizenLabel': 'Agent',
+	'game.spyfall.revealHiddenText': 'Tap to see your location',
+	'game.spyfall.votingTitle': 'WHO IS THE SPY?',
+	'game.spyfall.votingSubtitle': 'Select the suspicious player',
+
+	// ── Wordle Battle ───────────────────────────────────────────
+	'game.wordle.description': 'Guess the 5-letter word before your friends. 6 attempts!',
+	'game.wordle.heroSubtitle': 'Guess the word!',
+	'game.wordle.heroDescription': 'Each player tries to guess the same secret 5-letter word in 6 attempts. Whoever discovers it first wins!',
+	'game.wordle.playerLabel': 'Player',
+	'game.wordle.inputPlaceholder': 'Your name...',
 
 	// ── Common game strings ───────────────────────────────────────
 	'game.back': 'Back',

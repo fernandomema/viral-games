@@ -34,8 +34,18 @@ export function setLocale(locale: Locale) {
 	}
 }
 
-/** Detect locale from Discord SDK, browser, or localStorage */
+/** Detect locale from ?lang= param, Discord SDK, browser, or localStorage */
 export function detectLocale(discordLocale?: string): Locale {
+	// 0. URL ?lang= param (highest priority for SEO crawlers)
+	if (typeof window !== 'undefined') {
+		const urlLang = new URL(window.location.href).searchParams.get('lang')?.toLowerCase() as Locale | null;
+		if (urlLang && SUPPORTED_LOCALES.includes(urlLang)) {
+			currentLocale = urlLang;
+			localStorage.setItem('app-locale', urlLang);
+			return urlLang;
+		}
+	}
+
 	// 1. localStorage override
 	if (typeof localStorage !== 'undefined') {
 		const saved = localStorage.getItem('app-locale') as Locale | null;

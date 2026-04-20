@@ -36,6 +36,10 @@
 <svelte:head>
 	<title>Viral Games — Juegos de Grupo para Fiestas y Amigos | Gratis Online</title>
 	<meta name="description" content={t('home.meta')} />
+	<link rel="canonical" href="https://viral-games.servitimo.net{page.url.pathname}" />
+	<link rel="alternate" hreflang="es" href="https://viral-games.servitimo.net{page.url.pathname}?lang=es" />
+	<link rel="alternate" hreflang="en" href="https://viral-games.servitimo.net{page.url.pathname}?lang=en" />
+	<link rel="alternate" hreflang="x-default" href="https://viral-games.servitimo.net{page.url.pathname}" />
 </svelte:head>
 
 <div class="min-h-dvh bg-background text-on-background font-body selection:bg-primary/30">

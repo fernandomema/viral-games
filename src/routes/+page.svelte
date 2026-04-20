@@ -5,6 +5,15 @@
 	import { t, getLocale, setLocale, SUPPORTED_LOCALES } from '$lib/i18n';
 	import type { Locale } from '$lib/i18n';
 	import GameCard from '$lib/components/GameCard.svelte';
+	import JsonLd from '$lib/components/JsonLd.svelte';
+	import { organizationSchema, webApplicationSchema, faqSchema } from '$lib/games/schemas';
+
+	const homeFaqs = [
+		{ question: '¿Qué es Viral Games?', answer: 'Viral Games es una plataforma gratuita de juegos de grupo para fiestas y reuniones de amigos. Incluye juegos como El Impostor, ¡Basta!, Rosco Veloz, Crucigrama y más. Se juega directamente desde el navegador sin descargar nada.' },
+		{ question: '¿Cuántos jugadores se necesitan?', answer: 'Depende del juego: algunos requieren mínimo 2 jugadores (Basta, Rosco), otros 3 (Impostor). La mayoría admite hasta 10-12 jugadores. Ideal para fiestas y reuniones.' },
+		{ question: '¿Es gratis?', answer: 'Sí, todos los juegos de Viral Games son completamente gratuitos. No necesitas crear cuenta ni descargar ninguna aplicación.' },
+		{ question: '¿Se puede jugar online con amigos?', answer: 'Sí, la mayoría de juegos tienen modo online donde cada jugador juega desde su propio dispositivo. También puedes jugar en modo local pasando un solo móvil, o directamente en Discord.' },
+	];
 
 	let titleEls: (HTMLElement | undefined)[] = $state(Array(GAMES.length));
 	let iconEls: (HTMLElement | undefined)[] = $state(Array(GAMES.length));
@@ -121,6 +130,49 @@
 			</div>
 		</div>
 	</main>
+
+	<!-- ═══ SEO Content Block ═══ -->
+	<section class="relative z-10 max-w-3xl mx-auto px-5 pb-12">
+		<h2 class="font-headline text-xl font-bold text-on-surface mb-3">
+			{getLocale() === 'en' ? 'Free Party Games to Play with Friends Online' : 'Juegos de Fiesta Gratis para Jugar con Amigos Online'}
+		</h2>
+		<p class="text-on-surface-variant text-sm leading-relaxed mb-8">
+			{getLocale() === 'en'
+				? 'Viral Games is a free collection of multiplayer party games you can play directly in your browser. No downloads, no sign-ups — just pick a game, invite your friends, and start playing. Choose from social deduction games like The Impostor, word games like Basta and Rosco Veloz, puzzle games like Crossword, and more. Available in local mode (pass the phone), online mode (each player on their device), and Discord activities.'
+				: 'Viral Games es una colección gratuita de juegos multijugador para fiestas que puedes jugar directamente en tu navegador. Sin descargas, sin registros — solo elige un juego, invita a tus amigos y empieza a jugar. Elige entre juegos de deducción social como El Impostor, juegos de palabras como Basta y Rosco Veloz, juegos de puzzle como Crucigrama, y mucho más. Disponible en modo local (pasando el móvil), modo online (cada jugador en su dispositivo) y como actividad de Discord.'}
+		</p>
+
+		<!-- FAQ -->
+		<h2 class="font-headline text-lg font-bold text-on-surface mb-4">
+			{getLocale() === 'en' ? 'Frequently Asked Questions' : 'Preguntas Frecuentes'}
+		</h2>
+		<div class="flex flex-col gap-3">
+			{#each homeFaqs as faq}
+				<details class="group bg-surface-container rounded-xl border border-outline-variant/10">
+					<summary class="px-4 py-3 cursor-pointer text-on-surface font-medium text-sm flex items-center justify-between">
+						{faq.question}
+						<span class="iconify material-symbols--expand-more text-on-surface-variant group-open:rotate-180 transition-transform"></span>
+					</summary>
+					<p class="px-4 pb-3 text-on-surface-variant text-sm leading-relaxed">{faq.answer}</p>
+				</details>
+			{/each}
+		</div>
+	</section>
+
+	<!-- JSON-LD -->
+	<JsonLd data={organizationSchema()} />
+	<JsonLd data={webApplicationSchema()} />
+	<JsonLd data={faqSchema(homeFaqs)} />
+
+	<!-- ═══ Footer ═══ -->
+	<footer class="relative z-10 border-t border-outline-variant/10 py-8 px-6 text-center">
+		<div class="flex items-center justify-center gap-4 text-xs text-on-surface-variant/60">
+			<a href="/privacy" class="hover:text-on-surface-variant transition-colors">{getLocale() === 'en' ? 'Privacy Policy' : 'Política de Privacidad'}</a>
+			<span class="text-outline-variant/30">·</span>
+			<a href="/terms" class="hover:text-on-surface-variant transition-colors">{getLocale() === 'en' ? 'Terms of Service' : 'Términos de Servicio'}</a>
+		</div>
+		<p class="text-[10px] text-on-surface-variant/40 mt-3">© {new Date().getFullYear()} Viral Games</p>
+	</footer>
 </div>
 
 <style>

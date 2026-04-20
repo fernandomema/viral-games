@@ -8,10 +8,13 @@ import { createImpostorDrawGame, type ImpostorDrawEngine } from '../src/lib/game
 import { createImpostorDatosGame, type ImpostorDatosEngine } from '../src/lib/games/impostor-datos/engine.js';
 import { createBastaGame, type BastaEngine } from '../src/lib/games/basta/engine.js';
 import { createCrosswordGame, type CrosswordEngine } from '../src/lib/games/crossword/engine.js';
+import { createRoscoGame, type RoscoEngine } from '../src/lib/games/rosco/engine.js';
+import { createSpyfallGame, type SpyfallEngine } from '../src/lib/games/spyfall/engine.js';
+import { createProbableGame, type ProbableEngine } from '../src/lib/games/probable/engine.js';
 import type { WebSocket } from 'ws';
 
-export type GameId = 'impostor' | 'impostor-draw' | 'impostor-datos' | 'basta' | 'crossword';
-export type GameEngine = ImpostorEngine | ImpostorDrawEngine | ImpostorDatosEngine | BastaEngine | CrosswordEngine;
+export type GameId = 'impostor' | 'impostor-draw' | 'impostor-datos' | 'basta' | 'crossword' | 'rosco' | 'spyfall' | 'probable';
+export type GameEngine = ImpostorEngine | ImpostorDrawEngine | ImpostorDatosEngine | BastaEngine | CrosswordEngine | RoscoEngine | SpyfallEngine | ProbableEngine;
 
 function createEngine(gameId: GameId): GameEngine {
 	switch (gameId) {
@@ -20,6 +23,9 @@ function createEngine(gameId: GameId): GameEngine {
 		case 'impostor-datos': return createImpostorDatosGame();
 		case 'basta': return createBastaGame();
 		case 'crossword': return createCrosswordGame();
+		case 'rosco': return createRoscoGame();
+		case 'spyfall': return createSpyfallGame();
+		case 'probable': return createProbableGame();
 		default: throw new Error(`Juego desconocido: ${gameId}`);
 	}
 }
@@ -135,6 +141,30 @@ export function getPlayerView(room: Room, discordUserId: string) {
 			avatar: rp2?.avatar ?? null,
 		};
 	});
+
+	// Rosco game
+	if (room.gameId === 'rosco') {
+		const roscoEngine = room.engine as RoscoEngine;
+		const roscoState = roscoEngine.getState();
+
+		let winners: string[] | undefined;
+		if (roscoState.phase === 'results') {
+			winners = roscoEngine.getWinners().map((w: any) => w.name);
+		}
+
+		return {
+			type: 'state' as const,
+			state: {
+				...roscoState,
+				players: playersWithAvatars,
+			},
+			myRole: rp ? { playerId: rp.enginePlayerId } : null,
+			hostDiscordUserId: room.hostDiscordUserId,
+			roomId: room.id,
+			gameId: room.gameId,
+			winners,
+		};
+	}
 
 	// Crossword game
 	if (room.gameId === 'crossword') {
@@ -285,6 +315,18 @@ export function startTimer(room: Room) {
 					clearInterval(room.timerInterval);
 					room.timerInterval = null;
 				}
+			}
+		}, 1000);
+	} else if (room.gameId === 'rosco') {
+		const roscoEngine = room.engine as RoscoEngine;
+		roscoEngine.setPhase('playing');
+		room.timerInterval = setInterval(() => {
+			roscoEngine.tick();
+			const s = roscoEngine.getState();
+			broadcastState(room);
+			if (s.phase === 'results' && room.timerInterval) {
+				clearInterval(room.timerInterval);
+				room.timerInterval = null;
 			}
 		}, 1000);
 	} else {

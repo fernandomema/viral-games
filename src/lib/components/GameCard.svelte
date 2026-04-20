@@ -76,25 +76,65 @@
 			--pat-size:32px 32px;--pat-opacity:.45;
 			--pat-url:url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='2' y='2' width='12' height='12' fill='rgba(56,189,248,0.15)' rx='1'/%3E%3Crect x='18' y='18' width='12' height='12' fill='rgba(56,189,248,0.15)' rx='1'/%3E%3Crect x='2' y='18' width='12' height='12' fill='none' stroke='rgba(56,189,248,0.12)' rx='1'/%3E%3Crect x='18' y='2' width='12' height='12' fill='none' stroke='rgba(56,189,248,0.12)' rx='1'/%3E%3C/svg%3E")
 		`,
+		'rosco': `
+			--ca-glow:rgba(168,85,247,.25);--ca-glow2:rgba(236,72,153,.18);
+			--ca-border:rgba(168,85,247,.28);--ca-border-hi:rgba(236,72,153,.5);
+			--ca-icon-bg:rgba(168,85,247,.13);--ca-icon-border:rgba(236,72,153,.25);
+			--ca-tag:#d946ef;--ca-tag-bg:rgba(217,70,239,.1);--ca-tag-border:rgba(217,70,239,.22);
+			--ca-btn-bg:rgba(168,85,247,.18);--ca-btn-border:rgba(236,72,153,.3);
+			--pat-size:40px 40px;--pat-opacity:.45;
+			--pat-url:url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='20' cy='20' r='16' fill='none' stroke='rgba(168,85,247,0.22)' stroke-width='1.5'/%3E%3Ccircle cx='20' cy='4' r='2.5' fill='rgba(236,72,153,0.25)'/%3E%3Ccircle cx='36' cy='20' r='2.5' fill='rgba(168,85,247,0.25)'/%3E%3Ccircle cx='20' cy='36' r='2.5' fill='rgba(236,72,153,0.25)'/%3E%3Ccircle cx='4' cy='20' r='2.5' fill='rgba(168,85,247,0.25)'/%3E%3C/svg%3E")
+		`,
+		probable: `
+			--ca-glow:rgba(244,63,94,.25);--ca-glow2:rgba(251,113,133,.18);
+			--ca-border:rgba(244,63,94,.28);--ca-border-hi:rgba(244,63,94,.5);
+			--ca-icon-bg:rgba(244,63,94,.14);--ca-icon-border:rgba(244,63,94,.25);
+			--ca-tag:#f43f5e;--ca-tag-bg:rgba(244,63,94,.1);--ca-tag-border:rgba(244,63,94,.22);
+			--ca-btn-bg:rgba(244,63,94,.18);--ca-btn-border:rgba(244,63,94,.3);
+			--pat-size:36px 36px;--pat-opacity:.5;
+			--pat-url:url("data:image/svg+xml,%3Csvg width='36' height='36' viewBox='0 0 36 36' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='18' cy='18' r='10' fill='none' stroke='rgba(244,63,94,0.2)' stroke-width='1'/%3E%3Ctext x='18' y='22' font-size='14' text-anchor='middle' fill='rgba(244,63,94,0.18)'%3E%3F%3C/text%3E%3C/svg%3E")
+		`,
+		spyfall: `
+			--ca-glow:rgba(99,102,241,.25);--ca-glow2:rgba(129,140,248,.18);
+			--ca-border:rgba(99,102,241,.28);--ca-border-hi:rgba(99,102,241,.5);
+			--ca-icon-bg:rgba(99,102,241,.14);--ca-icon-border:rgba(99,102,241,.25);
+			--ca-tag:#6366f1;--ca-tag-bg:rgba(99,102,241,.1);--ca-tag-border:rgba(99,102,241,.22);
+			--ca-btn-bg:rgba(99,102,241,.18);--ca-btn-border:rgba(99,102,241,.3);
+			--pat-size:32px 32px;--pat-opacity:.5;
+			--pat-url:url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='16' cy='12' r='6' fill='none' stroke='rgba(99,102,241,0.22)' stroke-width='1'/%3E%3Cpath d='M16 18 L16 28' stroke='rgba(99,102,241,0.22)' stroke-width='2'/%3E%3Ccircle cx='16' cy='30' r='2' fill='rgba(99,102,241,0.18)'/%3E%3C/svg%3E")
+		`,
+		wordle: `
+			--ca-glow:rgba(34,197,94,.25);--ca-glow2:rgba(74,222,128,.18);
+			--ca-border:rgba(34,197,94,.28);--ca-border-hi:rgba(34,197,94,.5);
+			--ca-icon-bg:rgba(34,197,94,.14);--ca-icon-border:rgba(34,197,94,.25);
+			--ca-tag:#22c55e;--ca-tag-bg:rgba(34,197,94,.1);--ca-tag-border:rgba(34,197,94,.22);
+			--ca-btn-bg:rgba(34,197,94,.18);--ca-btn-border:rgba(34,197,94,.3);
+			--pat-size:30px 30px;--pat-opacity:.5;
+			--pat-url:url("data:image/svg+xml,%3Csvg width='30' height='30' viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='5' y='5' width='20' height='20' rx='3' fill='none' stroke='rgba(34,197,94,0.2)' stroke-width='1'/%3E%3Ctext x='15' y='20' font-size='12' text-anchor='middle' fill='rgba(34,197,94,0.18)'%3EA%3C/text%3E%3C/svg%3E")
+		`,
 	};
 
 	function getOnlineHref(): string | null {
 		if (!game.onlineEnabled) return null;
 		if (game.id === 'basta') return '/basta';
 		if (game.id === 'crossword') return '/crossword?mode=online';
+		if (game.id === 'rosco') return '/online/rosco';
+		if (game.id === 'probable') return '/online/probable';
 		return `/online/${game.id}`;
 	}
 
 	function getLocalHref(): string | null {
 		if (!game.localEnabled) return null;
-		if (game.externalUrl) return game.externalUrl;
 		if (game.id === 'crossword') return '/crossword?mode=local';
+		if (game.id === 'rosco') return '/rosco';
+		if (game.id === 'probable') return '/probable';
+		if (game.id === 'wordle') return '/wordle';
 		return `/${game.id}`;
 	}
 
 	function getPlayersBadge(): string {
 		if (game.type === 'guess') return getLocale() === 'en' ? '1 player' : '1 jugador';
-		if (game.type === 'basta' || game.type === 'external' || game.type === 'crossword') return `2+ ${getLocale() === 'en' ? 'players' : 'jugadores'}`;
+		if (game.type === 'basta' || game.type === 'external' || game.type === 'crossword' || game.type === 'rosco' || game.type === 'probable' || game.type === 'wordle') return `2+ ${getLocale() === 'en' ? 'players' : 'jugadores'}`;
 		return t('home.players');
 	}
 
@@ -147,28 +187,15 @@
 		<!-- Action buttons -->
 		<div class="flex gap-2 pt-2 border-t border-white/8 mt-auto">
 			{#if localHref}
-				{#if game.externalUrl}
-					<a
-						href={localHref}
-						target="_blank"
-						rel="noopener"
-						class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all active:scale-95"
-						style="background:var(--ca-btn-bg);border:1px solid var(--ca-btn-border);color:var(--ca-tag)"
-					>
-						<span class="iconify material-symbols--open-in-new text-sm"></span>
-						{t('home.play')}
-					</a>
-				{:else}
-					<a
-						href={localHref}
-						onclick={(e) => onNavigate(e, localHref!, index)}
-						class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all active:scale-95"
-						style="background:var(--ca-btn-bg);border:1px solid var(--ca-btn-border);color:var(--ca-tag)"
-					>
-						<span class="iconify material-symbols--smartphone text-sm"></span>
-						Local
-					</a>
-				{/if}
+				<a
+					href={localHref}
+					onclick={(e) => onNavigate(e, localHref!, index)}
+					class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all active:scale-95"
+					style="background:var(--ca-btn-bg);border:1px solid var(--ca-btn-border);color:var(--ca-tag)"
+				>
+					<span class="iconify material-symbols--smartphone text-sm"></span>
+					{game.onlineEnabled ? 'Local' : t('home.playLocal')}
+				</a>
 			{/if}
 			{#if onlineHref}
 				<a

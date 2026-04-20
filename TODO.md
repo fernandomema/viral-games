@@ -1,0 +1,9 @@
+- Games
+    - ahorcado
+    - overcooked
+- internal
+    - Palabras compartidas entre juegos
+        - Estructura de palabras: Palabra, descripcion (para juegos como cruzigrama o rosco), tags/categorias.
+- SEO
+    - Blog
+    - game landing -> breadcrumb

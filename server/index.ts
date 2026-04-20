@@ -282,6 +282,48 @@ function handleMessage(ws: WebSocket, client: ClientState, msg: any) {
 			break;
 		}
 
+		// ── Rosco-specific messages ─────────────────────────────
+		case 'roscoStart': {
+			const room = getRoom(client.roomId!);
+			if (!room || room.gameId !== 'rosco') throw new Error('No es un juego de rosco');
+			if (room.hostDiscordUserId !== client.discordUserId) {
+				throw new Error('Solo el host puede iniciar la partida');
+			}
+			const roscoEngine = room.engine as import('../src/lib/games/rosco/engine.js').RoscoEngine;
+			if (msg.config) roscoEngine.setConfig(msg.config);
+			roscoEngine.startGame();
+			startTimer(room);
+			broadcastState(room);
+			break;
+		}
+
+		case 'roscoAnswer': {
+			const room = getRoom(client.roomId!);
+			if (!room || room.gameId !== 'rosco') throw new Error('No es un juego de rosco');
+
+			const rp = room.players.find(p => p.discordUserId === client.discordUserId);
+			if (!rp) throw new Error('No estás en la room');
+
+			const roscoEngine2 = room.engine as import('../src/lib/games/rosco/engine.js').RoscoEngine;
+			const correct = roscoEngine2.answer(rp.enginePlayerId, msg.answer);
+			ws.send(JSON.stringify({ type: 'roscoResult', correct }));
+			broadcastState(room);
+			break;
+		}
+
+		case 'roscoPass': {
+			const room = getRoom(client.roomId!);
+			if (!room || room.gameId !== 'rosco') throw new Error('No es un juego de rosco');
+
+			const rp = room.players.find(p => p.discordUserId === client.discordUserId);
+			if (!rp) throw new Error('No estás en la room');
+
+			const roscoEngine3 = room.engine as import('../src/lib/games/rosco/engine.js').RoscoEngine;
+			roscoEngine3.pass(rp.enginePlayerId);
+			broadcastState(room);
+			break;
+		}
+
 		// ── Crossword-specific messages ──────────────────────────
 		case 'crosswordSubmit': {
 			const room = getRoom(client.roomId!);

@@ -6,6 +6,15 @@
 	import type { ImpostorDrawEngine, Stroke } from '$lib/games/impostor-draw';
 	import { createImpostorDatosGame, getFactCategories } from '$lib/games/impostor-datos';
 	import type { ImpostorDatosEngine } from '$lib/games/impostor-datos';
+	import { createRoscoGame } from '$lib/games/rosco';
+	import type { RoscoEngine } from '$lib/games/rosco';
+	import { createProbableGame } from '$lib/games/probable';
+	import type { ProbableEngine } from '$lib/games/probable';
+	import { createSpyfallGame } from '$lib/games/spyfall';
+	import type { SpyfallEngine } from '$lib/games/spyfall';
+	import { getSpyfallCategories } from '$lib/games/spyfall';
+	import { createWordleGame } from '$lib/games/wordle';
+	import type { WordleEngine } from '$lib/games/wordle';
 	import { createPalabraOcultaGame } from '$lib/games/palabra-oculta';
 	import type { PalabraOcultaEngine } from '$lib/games/palabra-oculta/engine';
 	import type { PalabraOcultaState } from '$lib/games/palabra-oculta/types';
@@ -16,20 +25,27 @@
 	import CategoryPicker from '$lib/components/CategoryPicker.svelte';
 	import { loadPlayers, savePlayers } from '$lib/players-store';
 	import { beforeNavigate } from '$app/navigation';
+	import { goto } from '$app/navigation';
 	import { setActiveGame } from '$lib/active-game';
 	import { haptic, hapticTap } from '$lib/haptics';
 	import { t, getLocale } from '$lib/i18n';
 	import { getGameSeo } from '$lib/games/seo';
+	import JsonLd from '$lib/components/JsonLd.svelte';
+	import { gameSchema, faqSchema } from '$lib/games/schemas';
 
 	let { data } = $props();
 	let game: GameDef = $derived(data.game);
 
 	// ── Engine setup ──────────────────────────────────────────────
-	type AnyEngine = ImpostorEngine | ImpostorDrawEngine | ImpostorDatosEngine;
+	type AnyEngine = ImpostorEngine | ImpostorDrawEngine | ImpostorDatosEngine | SpyfallEngine;
 
 	// Guess engine (separate — single-player)
 	let isGuessGame = $derived(game.type === 'guess');
 	let isExternalGame = $derived(game.type === 'external');
+	let isRoscoGame = $derived(game.type === 'rosco');
+	let isProbableGame = $derived(game.type === 'probable');
+	let isSpyfallGame = $derived(game.type === 'spyfall');
+	let isWordleGame = $derived(game.type === 'wordle');
 	let seo = $derived(getGameSeo(game.id, getLocale()));
 	// eslint-disable-next-line -- intentionally capturing initial game type for engine creation
 	const guessEngine: PalabraOcultaEngine | null = (() => data.game.type === 'guess' ? createPalabraOcultaGame() : null)();
@@ -41,16 +57,29 @@
 			case 'word': return createImpostorGame();
 			case 'draw': return createImpostorDrawGame();
 			case 'fact': return createImpostorDatosGame();
+			case 'spyfall': return createSpyfallGame(getLocale());
 			default: return null;
 		}
 	}
 
 	const engine = buildEngine();
 
+	// Rosco engine (separate — different game flow)
+	const roscoEngine: RoscoEngine | null = (() => data.game.type === 'rosco' ? createRoscoGame(getLocale()) : null)();
+
+	// Probable engine (separate — different game flow)
+	const probableEngine: ProbableEngine | null = (() => data.game.type === 'probable' ? createProbableGame() : null)();
+
+	// Wordle engine (separate — different game flow)
+	const wordleEngine: WordleEngine | null = (() => data.game.type === 'wordle' ? createWordleGame() : null)();
+
+	// The "active engine" for lobby operations (add/remove players)
+	const lobbyEngine = engine ?? roscoEngine ?? probableEngine ?? wordleEngine;
+
 	// Load saved players (only for multiplayer games)
-	if (engine) {
+	if (lobbyEngine) {
 		const saved = loadPlayers();
-		for (const p of saved) engine.addPlayer(p.name);
+		for (const p of saved) lobbyEngine.addPlayer(p.name);
 	}
 
 	// ── Categories ────────────────────────────────────────────────
@@ -58,11 +87,16 @@
 		game.type === 'guess' ? getGuessCategories(getLocale()).map(c => ({ name: c, icon: '' })) :
 		game.type === 'word' ? getWordCategories(getLocale()) :
 		game.type === 'draw' ? getDrawCategories(getLocale()) :
+		game.type === 'rosco' ? [] :
+		game.type === 'spyfall' ? [] :
 		getFactCategories(getLocale())
 	);
 
+	let isImpostorGame = $derived(game.type === 'word' || game.type === 'draw' || game.type === 'fact' || game.type === 'spyfall');
+	let minPlayers = $derived(isImpostorGame ? 3 : (isProbableGame || isWordleGame) ? 2 : 1);
+
 	// ── Reactive state ────────────────────────────────────────────
-	let gameState = $state(engine ? engine.getState() : { phase: 'lobby', players: [], currentRevealIndex: 0, roles: [] } as any);
+	let gameState = $state(lobbyEngine ? lobbyEngine.getState() : { phase: 'lobby', players: [], currentRevealIndex: 0, roles: [] } as any);
 	let playerName = $state('');
 	let revealedRole: any = $state(null);
 	let isRevealed = $state(false);
@@ -88,6 +122,7 @@
 
 	function sync() {
 		if (engine) gameState = engine.getState();
+		else if (roscoEngine) gameState = roscoEngine.getState();
 		if (guessEngine) guessState = guessEngine.getState();
 	}
 
@@ -156,8 +191,8 @@
 	// ── Shared functions ──────────────────────────────────────────
 	function addPlayer() {
 		const name = playerName.trim();
-		if (!name || !engine) return;
-		engine.addPlayer(name);
+		if (!name || !lobbyEngine) return;
+		lobbyEngine.addPlayer(name);
 		playerName = '';
 		sync();
 		savePlayers(gameState.players);
@@ -165,14 +200,31 @@
 	}
 
 	function removePlayer(id: string) {
-		if (!engine) return;
-		engine.removePlayer(id);
+		if (!lobbyEngine) return;
+		lobbyEngine.removePlayer(id);
 		sync();
 		savePlayers(gameState.players);
 		hapticTap();
 	}
 
 	function startGame() {
+		if (roscoEngine) {
+			// Save players and config, then navigate to rosco playing page
+			savePlayers(gameState.players);
+			sessionStorage.setItem('rosco-timer', String(configTimer));
+			goto('/rosco/play');
+			return;
+		}
+		if (probableEngine) {
+			savePlayers(gameState.players);
+			goto('/probable/play');
+			return;
+		}
+		if (wordleEngine) {
+			savePlayers(gameState.players);
+			goto('/wordle/play');
+			return;
+		}
 		if (!engine) return;
 		applyConfig();
 		engine.startGame(selectedCategory);
@@ -367,18 +419,14 @@
 	{#if seo}
 		<meta name="description" content={seo.description} />
 	{/if}
-	{#if seo && seo.faqs.length > 0}
-		{@html `<script type="application/ld+json">${JSON.stringify({
-			"@context": "https://schema.org",
-			"@type": "FAQPage",
-			mainEntity: seo.faqs.map(f => ({
-				"@type": "Question",
-				name: f.question,
-				acceptedAnswer: { "@type": "Answer", text: f.answer }
-			}))
-		})}</script>`}
-	{/if}
 </svelte:head>
+
+{#if seo}
+	<JsonLd data={gameSchema({ name: game.headerTitle, description: seo.description, url: `/${game.id}`, minPlayers: isRoscoGame ? 1 : 3, maxPlayers: 12 })} />
+	{#if seo.faqs.length > 0}
+		<JsonLd data={faqSchema(seo.faqs)} />
+	{/if}
+{/if}
 
 <!-- ═══ TopAppBar ═══ -->
 <header class="fixed top-0 w-full z-50 flex items-center justify-between px-4 h-16 bg-background/90 border-b border-outline-variant/20 shadow-[0_0_20px_rgba(202,152,255,0.08)]" style="backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)">
@@ -406,6 +454,7 @@
 				<!-- Hero -->
 				<GameHero {game} {isGreen} bind:iconEl={heroIconEl} bind:titleEl={heroTitleEl}>
 					<!-- Online play button -->
+					{#if isImpostorGame}
 					<a
 						href="/online/{game.id}"
 						class="mt-5 inline-flex items-center gap-2 px-5 py-2 rounded-full {isGreen ? 'bg-secondary/15 text-secondary border border-secondary/30 hover:bg-secondary/25' : 'bg-primary/15 text-primary border border-primary/30 hover:bg-primary/25'} text-sm font-bold font-headline transition-colors"
@@ -413,6 +462,23 @@
 						<span class="iconify material-symbols--wifi text-base"></span>
 						{t('web.playOnline')}
 					</a>
+					{:else if isRoscoGame}
+					<a
+						href="/online/rosco"
+						class="mt-5 inline-flex items-center gap-2 px-5 py-2 rounded-full bg-pink-500/15 text-pink-400 border border-pink-500/30 hover:bg-pink-500/25 text-sm font-bold font-headline transition-colors"
+					>
+						<span class="iconify material-symbols--wifi text-base"></span>
+						{t('web.playOnline')}
+					</a>
+					{:else if isProbableGame}
+					<a
+						href="/online/probable"
+						class="mt-5 inline-flex items-center gap-2 px-5 py-2 rounded-full bg-rose-500/15 text-rose-400 border border-rose-500/30 hover:bg-rose-500/25 text-sm font-bold font-headline transition-colors"
+					>
+						<span class="iconify material-symbols--wifi text-base"></span>
+						{t('web.playOnline')}
+					</a>
+					{/if}
 				</GameHero>
 
 				<!-- Player Config -->
@@ -488,14 +554,34 @@
 
 			<!-- Right column / sidebar: Config + Start -->
 			<div class="lg:sticky lg:top-24">
+				{#if isImpostorGame}
 				<GameConfig {game} {isGreen} bind:configImpostors bind:configTimer bind:configHint bind:configRounds bind:configTurnTimer {maxImpostors} playerCount={gameState.players.length} />
 
 				<CategoryPicker {categories} bind:selectedCategory {isGreen} />
+				{:else if isRoscoGame}
+				<!-- Rosco timer config -->
+				<div class="glass-panel rounded-2xl p-6 border border-outline-variant/10 mb-6">
+					<div class="flex items-center gap-2 mb-4">
+						<span class="iconify material-symbols--timer text-pink-500 text-xl"></span>
+						<h3 class="font-headline text-lg font-bold tracking-tight">{t('rosco.timer')}</h3>
+					</div>
+					<div class="flex flex-wrap gap-2">
+						{#each [60, 90, 120, 180, 300] as tv}
+							<button
+								onclick={() => { configTimer = tv; hapticTap(); }}
+								class="px-4 py-2 rounded-lg text-sm font-bold uppercase tracking-wider transition-all active:scale-95 {configTimer === tv ? 'bg-pink-600 text-white' : 'bg-surface-container-high text-on-surface-variant border border-outline-variant/20'}"
+							>
+								{Math.floor(tv / 60)}:{String(tv % 60).padStart(2, '0')}
+							</button>
+						{/each}
+					</div>
+				</div>
+				{/if}
 
 				<!-- Start Button -->
 				<button
 					onclick={startGame}
-					disabled={gameState.players.length < 3}
+					disabled={gameState.players.length < minPlayers}
 					class="w-full py-5 rounded-xl bg-linear-to-r from-primary-dim to-primary text-on-primary-fixed font-headline font-bold text-xl uppercase tracking-widest shadow-[0_0_30px_rgba(156,66,244,0.3)] hover:shadow-[0_0_45px_rgba(156,66,244,0.5)] active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-40 disabled:cursor-not-allowed"
 				>
 					{t('game.start')}

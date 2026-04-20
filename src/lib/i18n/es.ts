@@ -6,6 +6,7 @@ registerLocale('es', {
 	'home.chooseMode': 'ELIGE TU MODO',
 	'home.mode': 'MODO',
 	'home.play': 'JUGAR',
+	'home.playLocal': 'JUGAR LOCAL',
 	'home.players': '3–12 jugadores',
 	'home.offline': 'Sin internet',
 	'home.meta': 'Juegos sociales para jugar con amigos pasando el móvil',
@@ -47,6 +48,29 @@ registerLocale('es', {
 	'game.basta.heroDescription': 'Rellena las categorías con palabras que empiecen por la letra elegida. ¡El más rápido gana!',
 	'game.basta.playerLabel': 'Jugador',
 	'game.basta.citizenLabel': 'Jugador',
+	// Probable
+	'game.probable.description': 'Vota quién del grupo es más probable que haga algo. ¡Las risas están aseguradas!',
+	'game.probable.heroSubtitle': '¡Hora de votar!',
+	'game.probable.heroDescription': 'Responde quién del grupo es más probable que haga algo loco. ¡Las respuestas los sorprenderán!',
+	'game.probable.playerLabel': 'Jugador',
+	'game.probable.inputPlaceholder': 'Nombre del jugador...',
+	// Spyfall
+	'game.spyfall.description': 'Todos conocen la ubicación menos el espía. ¡Descúbrelo antes de que adivine!',
+	'game.spyfall.heroSubtitle': '¿Dónde estamos?',
+	'game.spyfall.heroDescription': 'Todos saben la ubicación secreta, menos el espía. Haz preguntas para descubrirlo... ¡sin revelar dónde estás!',
+	'game.spyfall.playerLabel': 'Agente',
+	'game.spyfall.inputPlaceholder': 'Nombre del agente...',
+	'game.spyfall.citizenLabel': 'Agente',
+	'game.spyfall.revealHiddenText': 'Pulsa para ver tu ubicación',
+	'game.spyfall.votingTitle': '¿QUIÉN ES EL ESPÍA?',
+	'game.spyfall.votingSubtitle': 'Selecciona al jugador sospechoso',
+
+	// ── Wordle Battle ───────────────────────────────────────────
+	'game.wordle.description': 'Adivina la palabra de 5 letras antes que tus amigos. ¡6 intentos!',
+	'game.wordle.heroSubtitle': '¡Adivina la palabra!',
+	'game.wordle.heroDescription': 'Cada jugador intenta adivinar la misma palabra secreta de 5 letras en 6 intentos. ¡Quien la descubra primero gana!',
+	'game.wordle.playerLabel': 'Jugador',
+	'game.wordle.inputPlaceholder': 'Tu nombre...',
 
 	// ── Common game strings ───────────────────────────────────────
 	'game.back': 'Volver',
@@ -275,4 +299,24 @@ registerLocale('es', {
 	'crossword.startGame': 'GENERAR CRUCIGRAMA',
 	'crossword.waiting': 'Esperando jugadores...',
 	'crossword.words': '{count} palabras',
+
+	// ── Rosco Veloz ───────────────────────────────────────────────
+	'game.rosco.description': 'Responde una definición por cada letra del abecedario. ¡El más rápido gana!',
+	'game.rosco.heroSubtitle': '¡Completa el Rosco!',
+	'game.rosco.heroDescription': 'Una definición por cada letra del abecedario. Responde, pasa o falla. ¡Quien más acierte gana!',
+	'game.rosco.playerLabel': 'Jugador',
+	'game.rosco.inputPlaceholder': 'Tu nombre',
+	'rosco.startsWith': 'Empieza por {letter}',
+	'rosco.contains': 'Contiene la {letter}',
+	'rosco.pass': 'PASAPALABRA',
+	'rosco.submit': 'ENVIAR',
+	'rosco.correct': 'aciertos',
+	'rosco.incorrect': 'fallos',
+	'rosco.pending': 'pendientes',
+	'rosco.winner': '¡Ganador!',
+	'rosco.waiting': 'Esperando al host...',
+	'rosco.startGame': '¡EMPEZAR!',
+	'rosco.timer': 'Tiempo',
+	'rosco.results': 'Resultados',
+	'rosco.yourTurn': 'Tu turno',
 });

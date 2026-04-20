@@ -80,6 +80,33 @@ const SEO_ES: Record<string, GameSeo> = {
 			{ question: '¿El Crucigrama es gratis?', answer: 'Sí, el Crucigrama Multijugador es completamente gratis. Se juega directamente desde el navegador sin necesidad de descargar ninguna aplicación.' },
 		],
 	},
+	probable: {
+		description:
+			'¿Quién es más probable? es un juego de votación social gratuito y online perfecto para fiestas, reuniones y quedadas con amigos. Se muestra una pregunta divertida del tipo "¿Quién es más probable que...?" y todos votan a quién del grupo creen que encaja mejor. Al final se revela quién recibió más votos. Es ideal para conocer mejor a tu grupo de amigos, romper el hielo y pasar un rato de risas. Se juega desde 2 jugadores, en modo local pasando el móvil o en modo online cada uno desde su dispositivo.',
+		faqs: [
+			{ question: '¿Cómo se juega Quién es más probable?', answer: 'Se muestra una pregunta divertida del tipo "¿Quién es más probable que...?" y cada jugador vota señalando a quién del grupo cree que encaja mejor. Se revelan los votos y quien recibe más votos se lleva el punto. Gana quien acumule más puntos al final de las rondas.' },
+			{ question: '¿Cuántos jugadores se necesitan?', answer: 'Se necesitan al menos 2 jugadores. El juego es más divertido con grupos de 4 o más personas. No hay límite máximo de jugadores.' },
+			{ question: '¿Es gratis?', answer: 'Sí, ¿Quién es más probable? es completamente gratis. Se juega desde el navegador sin descargar ninguna app.' },
+		],
+	},
+	spyfall: {
+		description:
+			'Impostor Ubicación es un juego de deducción social tipo Spyfall gratuito y online, perfecto para fiestas y reuniones. Todos los jugadores reciben la misma ubicación secreta (Hospital, Aeropuerto, Playa...) excepto el espía, que no sabe dónde está. El grupo hace preguntas para descubrir al espía, mientras el espía intenta adivinar la ubicación. Si el grupo vota correctamente al espía, ganan; si el espía adivina la ubicación, gana él. Se juega de 3 a 12 personas, gratis desde el navegador.',
+		faqs: [
+			{ question: '¿Cómo se juega Impostor Ubicación?', answer: 'Cada jugador recibe una ubicación secreta (excepto el espía que recibe ???). Durante rondas de preguntas, el grupo intenta identificar al espía sin revelar la ubicación. El espía observa las respuestas para intentar adivinar dónde están.' },
+			{ question: '¿En qué se diferencia de El Impostor?', answer: 'En Impostor Ubicación, el espía no recibe ninguna pista — solo sabe que es el espía. Las ubicaciones son más concretas (lugares reales) y el espía puede intentar adivinar la ubicación para ganar, incluso si lo descubren.' },
+			{ question: '¿Cuántos jugadores se necesitan?', answer: 'Se necesitan al menos 3 jugadores. El juego funciona mejor con 5-8 personas. Admite hasta 12 jugadores.' },
+		],
+	},
+	wordle: {
+		description:
+			'Wordle Battle es un juego multijugador gratuito inspirado en Wordle. Cada jugador intenta adivinar la misma palabra secreta de 5 letras en 6 intentos. Las letras se colorean: verde (posición correcta), amarillo (letra presente pero mal ubicada), gris (letra ausente). Quien adivine primero o con menos intentos gana. Perfecto para jugar con amigos desde el navegador.',
+		faqs: [
+			{ question: '¿Cómo se juega Wordle Battle?', answer: 'Cada jugador escribe palabras de 5 letras por turnos. Después de cada intento, las letras se colorean para indicar si están en la posición correcta (verde), presentes en la palabra (amarillo) o ausentes (gris). Gana quien adivine la palabra con menos intentos.' },
+			{ question: '¿Cuántos intentos hay?', answer: 'Cada jugador tiene 6 intentos para adivinar la palabra secreta de 5 letras.' },
+			{ question: '¿Se puede jugar gratis?', answer: 'Sí, Wordle Battle es completamente gratis. Se juega directamente desde el navegador sin descargar nada.' },
+		],
+	},
 };
 
 const SEO_EN: Record<string, GameSeo> = {
@@ -147,6 +174,33 @@ const SEO_EN: Record<string, GameSeo> = {
 			{ question: 'Can you play the Crossword alone?', answer: 'Yes, the Crossword has a single-player mode where you can solve the entire board at your own pace. Perfect as a pastime or to practice vocabulary.' },
 			{ question: 'What board sizes does the Crossword have?', answer: 'The Crossword offers three board sizes: Small (9×9), Medium (13×13) and Large (15×15). Larger boards have more words and are more challenging.' },
 			{ question: 'Is the Crossword free?', answer: 'Yes, Multiplayer Crossword is completely free. It plays directly in the browser with no app download needed.' },
+		],
+	},
+	probable: {
+		description:
+			'Most Likely To is a free online social voting game perfect for parties, gatherings and hangouts with friends. A fun question appears like "Who is most likely to...?" and everyone votes on who in the group best fits. The votes are revealed and whoever gets the most votes scores a point. It\'s ideal for getting to know your friend group better, breaking the ice and having a good laugh. Plays from 2 players, in local mode passing the phone or online with each player on their own device.',
+		faqs: [
+			{ question: 'How do you play Most Likely To?', answer: 'A fun question appears like "Who is most likely to...?" and each player votes for who they think best fits. Votes are revealed and whoever gets the most votes scores a point. The player with the most points at the end wins.' },
+			{ question: 'How many players do you need?', answer: 'You need at least 2 players. The game is more fun with groups of 4 or more. There\'s no maximum player limit.' },
+			{ question: 'Is it free?', answer: 'Yes, Most Likely To is completely free. Play in the browser with no app download needed.' },
+		],
+	},
+	spyfall: {
+		description:
+			'Impostor Location is a free online Spyfall-style social deduction game, perfect for parties and gatherings. All players receive the same secret location (Hospital, Airport, Beach...) except the spy, who doesn\'t know where they are. The group asks questions to find the spy, while the spy tries to guess the location. If the group correctly votes out the spy, they win; if the spy guesses the location, they win. Plays with 3-12 people, free in the browser.',
+		faqs: [
+			{ question: 'How do you play Impostor Location?', answer: 'Each player receives a secret location (except the spy who gets ???). During question rounds, the group tries to identify the spy without revealing the location. The spy observes answers to try to figure out where they are.' },
+			{ question: 'How is it different from The Impostor?', answer: 'In Impostor Location, the spy receives no hint at all — they only know they\'re the spy. Locations are more concrete (real places) and the spy can try to guess the location to win, even if they\'re caught.' },
+			{ question: 'How many players do you need?', answer: 'You need at least 3 players. The game works best with 5-8 people. Supports up to 12 players.' },
+		],
+	},
+	wordle: {
+		description:
+			'Wordle Battle is a free multiplayer game inspired by Wordle. Each player tries to guess the same secret 5-letter word in 6 attempts. Letters are colored: green (correct position), yellow (present but wrong position), gray (absent). Whoever guesses first or with fewer attempts wins. Perfect for playing with friends in the browser.',
+		faqs: [
+			{ question: 'How do you play Wordle Battle?', answer: 'Each player types 5-letter words taking turns. After each guess, letters are colored to indicate if they are in the correct position (green), present in the word (yellow), or absent (gray). The player who guesses the word with the fewest attempts wins.' },
+			{ question: 'How many attempts do you get?', answer: 'Each player gets 6 attempts to guess the secret 5-letter word.' },
+			{ question: 'Is it free to play?', answer: 'Yes, Wordle Battle is completely free. It plays directly in the browser with no download needed.' },
 		],
 	},
 };
